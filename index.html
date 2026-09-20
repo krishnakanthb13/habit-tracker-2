@@ -77,10 +77,15 @@
 
         <button id="openDataModalBtn" class="btn-secondary-action" title="Import, Export & Reset Data">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Data & Backup</span>
+          <span>Data Manager</span>
         </button>
 
         <div class="icon-actions-group">
+          <!-- Daily Reflection Note (Icon Only) -->
+          <button id="openQuickNoteBtn" class="btn-icon-ghost" title="Daily Reflection / Quick Note (Hotkey: J)" aria-label="Daily Note">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </button>
+
           <!-- Audio Toggle -->
           <button id="soundToggleBtn" class="btn-icon-ghost" title="Toggle Sound Feedback" aria-label="Toggle Sound">
             <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -93,21 +98,13 @@
             <span id="themeCycleLabel" class="theme-label-text">Dark</span>
           </button>
 
-          <!-- Pro Tools Dropdown -->
+          <!-- Pro Tools Dropdown (Utilities: Print, Shortcuts, Quick Backups) -->
           <div class="dropdown-wrapper">
-            <button id="proToolsMenuBtn" class="btn-icon-ghost" title="Pro Utilities & Export" aria-haspopup="true">
+            <button id="proToolsMenuBtn" class="btn-icon-ghost" title="Utilities & Shortcuts" aria-haspopup="true">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
             <div id="proToolsDropdown" class="dropdown-menu hidden">
-              <div class="dropdown-header">Pro Features Unlocked</div>
-              <button class="dropdown-item" id="dropdownOpenGuideBtn">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                How to Use / Guide
-              </button>
-              <button class="dropdown-item" id="dropdownOpenDataBtn">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Data Manager (Import/Export)
-              </button>
+              <div class="dropdown-header">Quick Tools & Export</div>
               <button class="dropdown-item" id="exportCsvBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 Export Month to CSV
@@ -124,6 +121,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Restore Data Backup
               </button>
+              <div class="dropdown-divider"></div>
               <button class="dropdown-item" id="printViewBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                 Print / Save PDF Grid
@@ -131,15 +129,6 @@
               <button class="dropdown-item" id="shortcutsBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
                 Keyboard Shortcuts (?)
-              </button>
-              <div class="dropdown-divider"></div>
-              <button class="dropdown-item text-gold" id="resetDemoBtn">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                Reset to Demo Data
-              </button>
-              <button class="dropdown-item text-danger" id="wipeAllDropdownBtn">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Wipe All Data (Blank Slate)
               </button>
             </div>
           </div>
@@ -190,7 +179,7 @@
         <div class="pro-feature-bar">
           <div class="pro-tip-item">
             <span class="pro-tip-badge">Pro Tip</span>
-            <span>Right-click or Alt+Click any cell to mark a <strong>Streak Freeze</strong> (Sick/Rest day) without breaking your streak!</span>
+            <span><strong>Right-click</strong> any cell to add a <strong>Daily Note</strong>, or <strong>Alt+Click</strong> to mark a <strong>Streak Freeze (🛡️)</strong>!</span>
           </div>
           <div class="pro-status-tag">
             <span class="pulse-dot"></span> Unlimited Habits Active
@@ -380,13 +369,13 @@
               <div class="guide-step-card">
                 <span class="step-number-badge">3</span>
                 <h4>Freeze Streaks on Rest Days</h4>
-                <p>Sick, resting, or traveling? <strong>Right-click or Alt+Click</strong> any cell to activate a <strong>Streak Freeze (🛡️)</strong>. It preserves your streak without breaking momentum.</p>
+                <p>Sick, resting, or traveling? <strong>Alt+Click</strong> any cell to activate a <strong>Streak Freeze (🛡️)</strong>. It preserves your streak without breaking momentum.</p>
               </div>
 
               <div class="guide-step-card">
                 <span class="step-number-badge">4</span>
                 <h4>Reflect & Review</h4>
-                <p>Switch to <strong>Journal & Notes</strong> to record mood insights. Blue dots appear on the grid wherever a note exists so you can trace your thoughts across time.</p>
+                <p><strong>Right-click</strong> any cell to instantly record a daily reflection. Blue dots appear on the grid wherever a note exists so you can trace your thoughts across time.</p>
               </div>
             </div>
           </div>
@@ -410,8 +399,8 @@
                 <div class="feature-card-icon">🛡️</div>
                 <div class="feature-card-body">
                   <h4>Streak Freeze (Skip Days)</h4>
-                  <p>In traditional habit trackers, a single missed day ruins your streak, causing psychological surrender (the <em>What-The-Hell effect</em>). Right-click any cell to place a freeze shield and keep your habit identity intact.</p>
-                  <span class="feature-pill-tag">Right-Click / Alt-Click</span>
+                  <p>In traditional habit trackers, a single missed day ruins your streak, causing psychological surrender (the <em>What-The-Hell effect</em>). Alt+Click any cell to place a freeze shield and keep your habit identity intact.</p>
+                  <span class="feature-pill-tag">Alt-Click Freeze</span>
                 </div>
               </div>
 
@@ -688,6 +677,57 @@
       </div>
     </div>
 
+    <!-- MODAL: QUICK REFLECTION / DAILY JOURNAL NOTE -->
+    <div id="quickNoteModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="quickNoteModalTitle">
+      <div class="modal-dialog modal-dialog-sm">
+        <div class="modal-header">
+          <div>
+            <h3 id="quickNoteModalTitle" class="modal-heading">Daily Reflection</h3>
+            <span id="quickNoteModalSubtitle" class="modal-subheading">Capture your thoughts or routine insights</span>
+          </div>
+          <button id="closeQuickNoteModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+
+        <form id="quickNoteForm" class="modal-form">
+          <input type="hidden" id="quickNoteEditId" value="">
+
+          <div class="form-row-two">
+            <div class="form-group">
+              <label for="quickNoteDateInput">Date</label>
+              <input type="date" id="quickNoteDateInput" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label for="quickNoteHabitSelect">Habit Tag (Optional)</label>
+              <select id="quickNoteHabitSelect" class="form-select">
+                <option value="">General Daily Note</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Today's Mood & Energy</label>
+            <div class="mood-selector" id="quickMoodSelector">
+              <button type="button" class="mood-btn active" data-mood="⚡ Energized">⚡ Energized</button>
+              <button type="button" class="mood-btn" data-mood="🎯 Focused">🎯 Focused</button>
+              <button type="button" class="mood-btn" data-mood="🌿 Peaceful">🌿 Peaceful</button>
+              <button type="button" class="mood-btn" data-mood="🌧️ Struggling">🌧️ Struggling</button>
+              <button type="button" class="mood-btn" data-mood="🚀 Victorious">🚀 Victorious</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="quickNoteTextInput">Reflection / Note <span class="required-star">*</span></label>
+            <textarea id="quickNoteTextInput" class="form-textarea" rows="4" placeholder="How did today go? Any wins, blockers, or feelings? (Ctrl+Enter to save)" required></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="cancelQuickNoteBtn" class="btn-secondary-ghost">Cancel</button>
+            <button type="submit" class="btn-primary-action">Save Reflection</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- MODAL: KEYBOARD SHORTCUTS -->
     <div id="shortcutsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
       <div class="modal-dialog modal-dialog-sm">
@@ -697,6 +737,7 @@
         </div>
         <div class="shortcuts-list">
           <div class="shortcut-item"><kbd>N</kbd> <span>Create new habit</span></div>
+          <div class="shortcut-item"><kbd>J</kbd> <span>Quick reflection / daily journal entry</span></div>
           <div class="shortcut-item"><kbd>T</kbd> <span>Jump to current month / today</span></div>
           <div class="shortcut-item"><kbd>&larr;</kbd> / <kbd>&rarr;</kbd> <span>Previous / Next month</span></div>
           <div class="shortcut-item"><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> <span>Switch views (Grid, Analytics, Journal, Guide)</span></div>

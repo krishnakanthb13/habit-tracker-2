@@ -51,24 +51,26 @@ Open **`http://127.0.0.1:5173/`** in your browser.
    - **Specific Days of the Week**: Target specific routines (e.g., Mon, Wed, Fri only).
    - **Numeric / Metric Target**: Log quantities (e.g., 2500 ml water, 30 pages reading, 10,000 steps) with easy stepper controls.
 4. **Streak Protection / Freeze Days (🛡️)**:
-   - Right-click or Alt-click any cell to freeze your streak during sick, travel, or rest days without breaking continuous momentum.
+   - **Alt-click** any cell to freeze your streak during sick, travel, or rest days without breaking continuous momentum.
 5. **Advanced Analytics & Streaks Matrix**:
    - **365-Day Consistency Heatmap**: Full GitHub-style annual activity matrix.
    - **Discipline by Day of Week**: Bar chart identifying your peak productivity days.
    - **Habit Leaderboard**: Current streaks vs all-time records with flame counters 🔥.
    - **Real-Time KPIs**: Monthly completion rate, goals smashed, and lifetime repetitions.
-6. **Integrated Daily Journal & Reflections**:
-   - Attach daily thoughts, reflections, and mood tags (`⚡ Energized`, `🎯 Focused`, `🌿 Peaceful`, `😴 Tired`) to any date or habit.
-   - Searchable reflection history with blue dot indicators on the grid.
+6. **Integrated Daily Journal & Quick Reflections**:
+   - **Frictionless Grid Reflections**: Add or edit daily thoughts directly from the Habit Grid by **Right-clicking any cell**, clicking the header **Daily Note** icon, tapping the habit row `📝` action, clicking the glowing blue cell note dot (`.has-note-dot`), or pressing <kbd>J</kbd>.
+   - Attach reflections and mood tags (`⚡ Energized`, `🎯 Focused`, `🌿 Peaceful`, `🌧️ Struggling`, `🚀 Victorious`) to any date or habit.
+   - Searchable reflection history with blue indicator dots directly on grid cells.
 7. **Complete Data Management & Freedom (100% Offline & Local)**:
-   - **Dedicated Data & Backup Manager**: One-click access from the header and Pro Tools menu.
+   - **Centralized Data Manager**: Comprehensive modal for import, export, and guarded resets.
+   - **Quick Pro Tools Menu**: 1-click downloads for Month CSV, Lifetime CSV, and JSON Backups without opening full modals.
    - **Full JSON Backup & Restore**: Export all habits, streak history, notes, and preferences into a single file. Drag & drop or paste JSON to restore anytime.
    - **Import Strategies**: Choose between **Clean Overwrite (Replace All)** or **Merge with Current Routines**.
    - **Spreadsheet Exports**:
      - **Export Month (CSV)**: Formatted table of the current active month.
      - **Export Lifetime (CSV)**: Complete chronological matrix of every recorded check-in across all months/years.
-   - **Reset Options (Danger Zone)**:
-     - **Wipe All Data (Blank Slate)**: Permanently erases all habits, check-ins, and notes to start completely from scratch (0 habits).
+   - **Guarded Reset Options (Data Manager Danger Zone)**:
+     - **Wipe All Data (Blank Slate)**: Permanently erases all habits, check-ins, and notes to start completely from scratch (0 habits), protected by double confirmation modals.
      - **Reset to Demo Starter Routines**: Re-populates fresh starter routines (Meditation, Reading, Hydration, etc.).
 8. **5 Cycling Color Themes & Tactile Audio**:
    - One-click cycling between 5 curated themes: **Midnight OLED Dark 🌙**, **Crisp Paper Light ☀️**, **Forest Sage 🌲**, **Nordic Ocean 🌊**, and **Sunset Ember 🌅**.
@@ -86,6 +88,7 @@ Open **`http://127.0.0.1:5173/`** in your browser.
 | Shortcut | Action |
 |---|---|
 | <kbd>N</kbd> | Open New Habit dialog |
+| <kbd>J</kbd> | Open Quick Daily Reflection / Journal entry (<kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save) |
 | <kbd>T</kbd> | Jump to today's date & current month |
 | <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> | Navigate previous / next month |
 | <kbd>1</kbd> | Switch to **Habit Grid** view |

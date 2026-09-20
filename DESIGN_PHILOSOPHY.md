@@ -33,8 +33,8 @@ Traditional habit trackers display one habit per screen or large card, forcing e
 - **Summary Columns**: Real-time targets, achieved counts, active streaks, and progress percentages are visible on every single row without leaving the view.
 
 ### II. Resilience Over Perfectionism (The Streak Freeze 🛡️)
-In traditional habit trackers, a single sick or travel day breaks a 90-day streak. Behavioral psychology calls this the **"What-the-Hell Effect"**—once a streak breaks, users surrender and abandon the routine altogether.
-- In DailyHabits Pro, users can **Right-Click or Alt+Click** any cell to set a **Streak Freeze (🛡️)**.
+In traditional habit trackers, a single missed day ruins your streak, causing psychological surrender (the **"What-the-Hell Effect"**)—once a streak breaks, users surrender and abandon the routine altogether.
+- In DailyHabits Pro, users can **Alt+Click** any cell to set a **Streak Freeze (🛡️)**.
 - A frozen day protects the continuous chain without penalizing the user for taking rest or recovering from illness.
 
 ### III. Tactile & Auditory Delight
@@ -48,6 +48,11 @@ Users should never fear losing their habit history:
 - **Flexible Restore**: Choose between "Replace All" or "Merge with Existing Routines".
 - **Clean CSV Exports**: Formatted spreadsheets ready for Microsoft Excel, Apple Numbers, or Google Sheets.
 - **Ink-Friendly Printing**: A dedicated print stylesheet strips away navigation bars and renders a clean paper grid for analog tracking.
+
+### V. Frictionless Reflection (Merging Quantitative & Qualitative Tracking)
+Checking off a cell tells you *what* happened; reflecting tells you *why*.
+- Habit tracking often fails when journaling is treated as a separate chore requiring users to leave their active tracking screen.
+- DailyHabits Pro embeds reflection directly into the monthly grid: **Right-click** any day cell, click the header Daily Note icon, tap any row's `📝` action, or press <kbd>J</kbd> to jot down thoughts, energy levels, or blockers in seconds without breaking context.
 
 ---
 
@@ -67,3 +72,4 @@ Users should never fear losing their habit history:
 | **Vanilla HTML/CSS/JS** | No React/Vue/Angular reactivity boilerplate. | Ensures near-instant page load (<50ms), ultra-small bundle size (~25 kB), and zero framework obsolescence over a decade. |
 | **LocalStorage Persistence** | Data is scoped to the specific browser origin. | Eliminates server costs, database maintenance, and privacy liabilities. Mitigated by one-click JSON backup & restore. |
 | **Custom In-App Modals** | Extra custom component code instead of `window.confirm()`. | Native dialogs are often blocked by browsers, look jarring, and freeze background threads. Custom modals provide predictable, accessible, and beautiful confirmations. |
+| **Centralized Danger Zone** | Destructive actions (reset, wipe) removed from quick menus. | Confining destructive actions strictly inside the Data Manager modal behind double confirmation guards prevents catastrophic accidental data loss while keeping non-destructive exports ubiquitous. |

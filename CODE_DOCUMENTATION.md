@@ -98,6 +98,9 @@ graph TD
 | `showToast(message, type)` | `message: String, type: String` | Displays animated toast notifications (`success`, `warn`, `error`). |
 | `cycleTheme()` | none | Cycles between 5 curated themes (`dark`, `light`, `forest`, `ocean`, `sunset`). |
 | `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers and columns. |
+| `openQuickNoteModal(date, habitId, noteId)` | `date?: String, habitId?: String, noteId?: String` | Opens daily reflection dialog pre-populated for given date/habit with mood chips. |
+| `closeQuickNoteModal()` | none | Closes reflection modal and resets text inputs. |
+| `handleQuickNoteSubmit(e)` | `e?: Event` | Persists reflection to `appData.notes`, refreshes grid indicators, and displays toast. |
 | `renderAnalytics()` | none | Populates KPI cards, 365-day activity matrix, day-of-week bars, and leaderboard. |
 | `renderJournal()` | none | Displays daily reflection feed with mood badges and search filter. |
 

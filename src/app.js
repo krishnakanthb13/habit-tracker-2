@@ -76,20 +76,16 @@ const themeCycleBtn = document.getElementById('themeCycleBtn');
 const themeCycleIcon = document.getElementById('themeCycleIcon');
 const themeCycleLabel = document.getElementById('themeCycleLabel');
 
-const dropdownOpenGuideBtn = document.getElementById('dropdownOpenGuideBtn');
-
 const proToolsMenuBtn = document.getElementById('proToolsMenuBtn');
 const proToolsDropdown = document.getElementById('proToolsDropdown');
 
 const openDataModalBtn = document.getElementById('openDataModalBtn');
-const dropdownOpenDataBtn = document.getElementById('dropdownOpenDataBtn');
 const dataModal = document.getElementById('dataModal');
 const closeDataModalBtn = document.getElementById('closeDataModalBtn');
 
 const dataExportJsonBtn = document.getElementById('dataExportJsonBtn');
 const dataExportMonthCsvBtn = document.getElementById('dataExportMonthCsvBtn');
 const dataExportAllCsvBtn = document.getElementById('dataExportAllCsvBtn');
-const exportAllCsvDropdownBtn = document.getElementById('exportAllCsvDropdownBtn');
 
 const browseJsonBtn = document.getElementById('browseJsonBtn');
 const importDropZone = document.getElementById('importDropZone');
@@ -99,17 +95,30 @@ const executeImportBtn = document.getElementById('executeImportBtn');
 
 const dangerResetDemoBtn = document.getElementById('dangerResetDemoBtn');
 const dangerWipeAllBtn = document.getElementById('dangerWipeAllBtn');
-const wipeAllDropdownBtn = document.getElementById('wipeAllDropdownBtn');
 
 const toastContainer = document.getElementById('toastContainer');
 
 const exportCsvBtn = document.getElementById('exportCsvBtn');
+const exportAllCsvDropdownBtn = document.getElementById('exportAllCsvDropdownBtn');
 const exportJsonBtn = document.getElementById('exportJsonBtn');
 const importJsonBtn = document.getElementById('importJsonBtn');
+
 const jsonFileInput = document.getElementById('jsonFileInput');
 const printViewBtn = document.getElementById('printViewBtn');
 const shortcutsBtn = document.getElementById('shortcutsBtn');
-const resetDemoBtn = document.getElementById('resetDemoBtn');
+
+// Quick Reflection Modal elements
+const openQuickNoteBtn = document.getElementById('openQuickNoteBtn');
+const quickNoteModal = document.getElementById('quickNoteModal');
+const closeQuickNoteModalBtn = document.getElementById('closeQuickNoteModalBtn');
+const cancelQuickNoteBtn = document.getElementById('cancelQuickNoteBtn');
+const quickNoteForm = document.getElementById('quickNoteForm');
+const quickNoteEditId = document.getElementById('quickNoteEditId');
+const quickNoteDateInput = document.getElementById('quickNoteDateInput');
+const quickNoteHabitSelect = document.getElementById('quickNoteHabitSelect');
+const quickMoodSelector = document.getElementById('quickMoodSelector');
+const quickNoteTextInput = document.getElementById('quickNoteTextInput');
+const quickNoteModalSubtitle = document.getElementById('quickNoteModalSubtitle');
 
 // Modals
 const habitModal = document.getElementById('habitModal');
@@ -491,9 +500,9 @@ function renderHabitGrid() {
             data-habit-id="${habit.id}"
             data-date-key="${dateKey}"
             data-day="${d}"
-            title="${isCompleted ? 'Completed' : completionVal === 'skipped' ? 'Streak Frozen' : 'Click to complete'} - ${dateKey}">
+            title="${isCompleted ? 'Completed' : completionVal === 'skipped' ? 'Streak Frozen (🛡️)' : 'Click to check'} - ${dateKey} (Right-click: Note, Alt-click: Streak Freeze)">
             ${btnContent}
-            ${hasNote ? '<span class="has-note-dot" title="Note attached"></span>' : ''}
+            ${hasNote ? '<span class="has-note-dot" title="Reflection note attached (Click to view/edit)"></span>' : ''}
           </button>
         </td>`;
     }
@@ -522,6 +531,9 @@ function renderHabitGrid() {
       </td>
       <td class="td-actions">
         <div class="row-actions-group">
+          <button class="btn-row-action note-habit-btn" data-id="${habit.id}" title="Daily reflection for this habit (J)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </button>
           <button class="btn-row-action edit-habit-btn" data-id="${habit.id}" title="Edit habit">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
           </button>
@@ -567,6 +579,30 @@ function handleCheckCellClick(e) {
   const habit = appData.habits.find(h => h.id === habitId);
   if (!habit) return;
 
+  // If clicking directly on note dot indicator, open Quick Reflection modal
+  if (e.target.closest('.has-note-dot')) {
+    openQuickNoteModal(dateKey, habitId);
+    return;
+  }
+
+  // Alt-click: Toggle Streak Freeze (🛡️)
+  if (e.altKey) {
+    if (!habit.completions) habit.completions = {};
+    const currentVal = habit.completions[dateKey];
+    if (currentVal === 'skipped') {
+      delete habit.completions[dateKey];
+      if (settings.soundEnabled) playUncheckSound();
+      showToast('Streak freeze removed.', 'warn');
+    } else {
+      habit.completions[dateKey] = 'skipped';
+      if (settings.soundEnabled) playSkipSound();
+      showToast('Streak freeze applied 🛡️', 'success');
+    }
+    saveAppData(appData);
+    renderHabitGrid();
+    return;
+  }
+
   if (!habit.completions) habit.completions = {};
   const currentVal = habit.completions[dateKey];
 
@@ -597,6 +633,7 @@ function handleCheckCellClick(e) {
   renderHabitGrid();
 }
 
+// Right-click opens Quick Reflection / Daily Note
 function handleCheckCellRightClick(e) {
   const btn = e.target.closest('.check-toggle-btn');
   if (!btn) return;
@@ -607,20 +644,8 @@ function handleCheckCellRightClick(e) {
   const habit = appData.habits.find(h => h.id === habitId);
   if (!habit) return;
 
-  if (!habit.completions) habit.completions = {};
-  const currentVal = habit.completions[dateKey];
-
-  // Toggle freeze/skip day
-  if (currentVal === 'skipped') {
-    delete habit.completions[dateKey];
-    if (settings.soundEnabled) playUncheckSound();
-  } else {
-    habit.completions[dateKey] = 'skipped';
-    if (settings.soundEnabled) playSkipSound();
-  }
-
-  saveAppData(appData);
-  renderHabitGrid();
+  // Right-click opens Daily Reflection / Note modal for this date and habit
+  openQuickNoteModal(dateKey, habitId);
 }
 
 function isHabitGoalMet(habit) {
@@ -883,6 +908,109 @@ function handleCellDetailSubmit(e) {
 }
 
 // ==========================================
+// QUICK REFLECTION / DAILY NOTE MODAL
+// ==========================================
+function openQuickNoteModal(prefillDate = null, prefillHabitId = null, noteId = null) {
+  // Populate habits select dropdown
+  quickNoteHabitSelect.innerHTML = `<option value="">General Daily Note</option>` +
+    appData.habits.filter(h => !h.archived).map(h => `<option value="${h.id}">${h.title}</option>`).join('');
+
+  const targetDate = prefillDate || formatDateKey(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+  quickNoteDateInput.value = targetDate;
+
+  if (prefillHabitId) {
+    quickNoteHabitSelect.value = prefillHabitId;
+  } else {
+    quickNoteHabitSelect.value = '';
+  }
+
+  // Check if a note already exists for this date and habit
+  let targetNote = null;
+  if (noteId) {
+    targetNote = appData.notes?.find(n => n.id === noteId);
+  } else if (prefillDate && prefillHabitId) {
+    targetNote = appData.notes?.find(n => n.date === prefillDate && n.habitId === prefillHabitId);
+  } else if (prefillDate) {
+    targetNote = appData.notes?.find(n => n.date === prefillDate && (!n.habitId || n.habitId === prefillHabitId));
+  }
+
+  if (targetNote) {
+    quickNoteEditId.value = targetNote.id;
+    quickNoteTextInput.value = targetNote.text;
+    quickNoteDateInput.value = targetNote.date;
+    if (targetNote.habitId) quickNoteHabitSelect.value = targetNote.habitId;
+    quickNoteModalSubtitle.textContent = `Editing reflection for ${targetNote.date}`;
+    quickMoodSelector.querySelectorAll('.mood-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-mood') === targetNote.mood);
+    });
+  } else {
+    quickNoteEditId.value = '';
+    quickNoteTextInput.value = '';
+    const habit = prefillHabitId ? appData.habits.find(h => h.id === prefillHabitId) : null;
+    quickNoteModalSubtitle.textContent = habit ? `Reflection on "${habit.title}"` : 'Capture your thoughts or routine insights';
+    quickMoodSelector.querySelectorAll('.mood-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx === 0);
+    });
+  }
+
+  quickNoteModal.classList.remove('hidden');
+  setTimeout(() => quickNoteTextInput.focus(), 50);
+}
+
+function closeQuickNoteModal() {
+  quickNoteModal.classList.add('hidden');
+  quickNoteEditId.value = '';
+  quickNoteTextInput.value = '';
+}
+
+function handleQuickNoteSubmit(e) {
+  if (e) e.preventDefault();
+  const text = quickNoteTextInput.value.trim();
+  if (!text) {
+    showToast('Please enter your reflection note.', 'warn');
+    return;
+  }
+
+  const date = quickNoteDateInput.value || formatDateKey(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+  const habitId = quickNoteHabitSelect.value || null;
+  const activeMoodBtn = quickMoodSelector.querySelector('.mood-btn.active');
+  const mood = activeMoodBtn ? activeMoodBtn.getAttribute('data-mood') : '⚡ Energized';
+  const editId = quickNoteEditId.value;
+
+  if (!appData.notes) appData.notes = [];
+
+  if (editId) {
+    const note = appData.notes.find(n => n.id === editId);
+    if (note) {
+      note.text = text;
+      note.date = date;
+      note.habitId = habitId;
+      note.mood = mood;
+    }
+  } else {
+    const existing = appData.notes.find(n => n.date === date && (n.habitId || null) === habitId);
+    if (existing) {
+      existing.text = text;
+      existing.mood = mood;
+    } else {
+      appData.notes.unshift({
+        id: 'note_' + Date.now(),
+        date,
+        habitId,
+        text,
+        mood
+      });
+    }
+  }
+
+  saveAppData(appData);
+  showToast('Daily reflection saved!', 'success');
+  closeQuickNoteModal();
+  renderHabitGrid();
+  if (activeView === 'journal') renderNotesFeed();
+}
+
+// ==========================================
 // ANALYTICS VIEW
 // ==========================================
 function renderAnalytics() {
@@ -1092,15 +1220,17 @@ function setupEventListeners() {
 
   if (guideNewHabitBtn) guideNewHabitBtn.addEventListener('click', () => openHabitModal(null));
   if (guideGoToGridBtn) guideGoToGridBtn.addEventListener('click', () => setView('grid'));
-  if (dropdownOpenGuideBtn) {
-    dropdownOpenGuideBtn.addEventListener('click', () => {
-      setView('guide');
-      proToolsDropdown.classList.add('hidden');
-    });
-  }
 
   // Habit Grid interactive delegation
   habitTableBody.addEventListener('click', (e) => {
+    // Note reflection button in habit row
+    const noteBtn = e.target.closest('.note-habit-btn');
+    if (noteBtn) {
+      const id = noteBtn.getAttribute('data-id');
+      openQuickNoteModal(null, id);
+      return;
+    }
+
     // Check cell toggle
     if (e.target.closest('.check-toggle-btn')) {
       handleCheckCellClick(e);
@@ -1235,7 +1365,6 @@ function setupEventListeners() {
   }
 
   openDataModalBtn.addEventListener('click', () => openDataModal('export'));
-  dropdownOpenDataBtn.addEventListener('click', () => openDataModal('export'));
   closeDataModalBtn.addEventListener('click', closeDataModal);
 
   dataModal.querySelectorAll('.data-tab-btn').forEach(btn => {
@@ -1268,19 +1397,22 @@ function setupEventListeners() {
   }
 
   dataExportJsonBtn.addEventListener('click', triggerJsonExport);
-  exportJsonBtn.addEventListener('click', triggerJsonExport);
+  if (exportJsonBtn) exportJsonBtn.addEventListener('click', triggerJsonExport);
 
   dataExportMonthCsvBtn.addEventListener('click', triggerMonthCsvExport);
-  exportCsvBtn.addEventListener('click', triggerMonthCsvExport);
+  if (exportCsvBtn) exportCsvBtn.addEventListener('click', triggerMonthCsvExport);
 
   dataExportAllCsvBtn.addEventListener('click', triggerLifetimeCsvExport);
-  exportAllCsvDropdownBtn.addEventListener('click', triggerLifetimeCsvExport);
+  if (exportAllCsvDropdownBtn) exportAllCsvDropdownBtn.addEventListener('click', triggerLifetimeCsvExport);
 
   // Import Drag & Drop + File Selection
   browseJsonBtn.addEventListener('click', () => jsonFileInput.click());
-  importJsonBtn.addEventListener('click', () => {
-    openDataModal('import');
-  });
+  if (importJsonBtn) {
+    importJsonBtn.addEventListener('click', () => {
+      proToolsDropdown.classList.add('hidden');
+      openDataModal('import');
+    });
+  }
 
   importDropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -1393,10 +1525,7 @@ function setupEventListeners() {
   }
 
   dangerResetDemoBtn.addEventListener('click', handleResetToDemo);
-  resetDemoBtn.addEventListener('click', handleResetToDemo);
-
   dangerWipeAllBtn.addEventListener('click', handleWipeAllData);
-  wipeAllDropdownBtn.addEventListener('click', handleWipeAllData);
 
   printViewBtn.addEventListener('click', () => {
     proToolsDropdown.classList.add('hidden');
@@ -1533,6 +1662,36 @@ function setupEventListeners() {
     renderHabitGrid();
   });
 
+  // Quick Reflection Modal events
+  if (openQuickNoteBtn) {
+    openQuickNoteBtn.addEventListener('click', () => openQuickNoteModal());
+  }
+  if (closeQuickNoteModalBtn) {
+    closeQuickNoteModalBtn.addEventListener('click', closeQuickNoteModal);
+  }
+  if (cancelQuickNoteBtn) {
+    cancelQuickNoteBtn.addEventListener('click', closeQuickNoteModal);
+  }
+  if (quickMoodSelector) {
+    quickMoodSelector.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mood-btn');
+      if (!btn) return;
+      quickMoodSelector.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  }
+  if (quickNoteForm) {
+    quickNoteForm.addEventListener('submit', handleQuickNoteSubmit);
+  }
+  if (quickNoteTextInput) {
+    quickNoteTextInput.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        handleQuickNoteSubmit();
+      }
+    });
+  }
+
   // Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
     // If typing in input, don't trigger global shortcuts
@@ -1540,6 +1699,7 @@ function setupEventListeners() {
       if (e.key === 'Escape') {
         closeHabitModal();
         closeCellDetailModal();
+        closeQuickNoteModal();
         closeDataModal();
         shortcutsModal.classList.add('hidden');
         if (confirmModal) confirmModal.classList.add('hidden');
@@ -1550,6 +1710,9 @@ function setupEventListeners() {
     if (e.key === 'n' || e.key === 'N') {
       e.preventDefault();
       openHabitModal(null);
+    } else if (e.key === 'j' || e.key === 'J') {
+      e.preventDefault();
+      openQuickNoteModal();
     } else if (e.key === 't' || e.key === 'T') {
       e.preventDefault();
       jumpToToday();
@@ -1572,6 +1735,7 @@ function setupEventListeners() {
     } else if (e.key === 'Escape') {
       closeHabitModal();
       closeCellDetailModal();
+      closeQuickNoteModal();
       closeDataModal();
       shortcutsModal.classList.add('hidden');
       proToolsDropdown.classList.add('hidden');
