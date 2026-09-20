@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyHabits Pro - Lightweight Minimalist Habit Tracker</title>
+  <meta name="description" content="Ultra-lightweight, beautiful daily habit tracker inspired by DailyHabits with all Pro features unlocked. Unlimited habits, analytics, streaks, journaling, and offline privacy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path d='m9 12 2 2 4-4' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+</head>
+<body>
+  <div id="app" class="app-container">
+    
+    <!-- Top Global Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">DailyHabits</span>
+            <span class="pro-badge">PRO UNLOCKED</span>
+          </div>
+        </div>
+
+        <!-- Month Navigation -->
+        <div class="date-navigator" role="navigation" aria-label="Month Navigation">
+          <button id="prevMonthBtn" class="nav-arrow-btn" title="Previous Month (Arrow Left)" aria-label="Previous Month">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          
+          <div class="current-month-display" id="monthDisplayWrap">
+            <h1 id="currentMonthLabel" class="current-month-label">September 2026</h1>
+          </div>
+
+          <button id="nextMonthBtn" class="nav-arrow-btn" title="Next Month (Arrow Right)" aria-label="Next Month">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+
+          <button id="todayJumpBtn" class="btn-today-pill" title="Jump to Today (Hotkey: T)">Today</button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="view-tabs" role="tablist">
+        <button id="tabGrid" class="tab-btn active" role="tab" aria-selected="true" data-view="grid">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          <span>Habit Grid</span>
+        </button>
+        <button id="tabAnalytics" class="tab-btn" role="tab" aria-selected="false" data-view="analytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Analytics & Streaks</span>
+        </button>
+        <button id="tabJournal" class="tab-btn" role="tab" aria-selected="false" data-view="journal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <span>Journal & Notes</span>
+        </button>
+        <button id="tabGuide" class="tab-btn" role="tab" aria-selected="false" data-view="guide">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span>How to Use</span>
+        </button>
+      </nav>
+
+      <!-- Top Actions (New Habit, Data & Backup, Themes, Pro Tools) -->
+      <div class="header-right">
+        <button id="openNewHabitBtn" class="btn-primary-action" title="Create New Habit (Hotkey: N)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Habit</span>
+        </button>
+
+        <button id="openDataModalBtn" class="btn-secondary-action" title="Import, Export & Reset Data">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Data & Backup</span>
+        </button>
+
+        <div class="icon-actions-group">
+          <!-- Audio Toggle -->
+          <button id="soundToggleBtn" class="btn-icon-ghost" title="Toggle Sound Feedback" aria-label="Toggle Sound">
+            <svg id="soundIconOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            <svg id="soundIconOff" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+          </button>
+
+          <!-- Theme Cycling Button -->
+          <button id="themeCycleBtn" class="btn-theme-cycle" title="Click to Cycle Theme (Dark, Light, Forest, Ocean, Sunset)" aria-label="Cycle Theme">
+            <span id="themeCycleIcon" class="theme-cycle-icon">🌙</span>
+            <span id="themeCycleLabel" class="theme-label-text">Dark</span>
+          </button>
+
+          <!-- Pro Tools Dropdown -->
+          <div class="dropdown-wrapper">
+            <button id="proToolsMenuBtn" class="btn-icon-ghost" title="Pro Utilities & Export" aria-haspopup="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+            </button>
+            <div id="proToolsDropdown" class="dropdown-menu hidden">
+              <div class="dropdown-header">Pro Features Unlocked</div>
+              <button class="dropdown-item" id="dropdownOpenGuideBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                How to Use / Guide
+              </button>
+              <button class="dropdown-item" id="dropdownOpenDataBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Data Manager (Import/Export)
+              </button>
+              <button class="dropdown-item" id="exportCsvBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                Export Month to CSV
+              </button>
+              <button class="dropdown-item" id="exportAllCsvDropdownBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                Export Lifetime CSV
+              </button>
+              <button class="dropdown-item" id="exportJsonBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Backup All Data (JSON)
+              </button>
+              <button class="dropdown-item" id="importJsonBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Restore Data Backup
+              </button>
+              <button class="dropdown-item" id="printViewBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print / Save PDF Grid
+              </button>
+              <button class="dropdown-item" id="shortcutsBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+                Keyboard Shortcuts (?)
+              </button>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item text-gold" id="resetDemoBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                Reset to Demo Data
+              </button>
+              <button class="dropdown-item text-danger" id="wipeAllDropdownBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Wipe All Data (Blank Slate)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sub-header Category & Quick Filter Toolbar -->
+    <div class="sub-header-bar">
+      <div class="categories-scroller" id="categoryChips">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="header-stats-summary" id="headerStatsSummary">
+        <!-- Dynamic: e.g. "6 Habits • 78% Achieved" -->
+      </div>
+    </div>
+
+    <!-- MAIN VIEW AREA -->
+    <main class="main-content">
+      
+      <!-- VIEW 1: HABIT GRID -->
+      <section id="viewGrid" class="view-panel active">
+        <div class="grid-card-container">
+          <div class="table-scroll-wrapper" id="gridScrollWrapper">
+            <table class="habit-table" id="habitTable">
+              <thead id="habitTableHead">
+                <!-- Dynamically rendered month header -->
+              </thead>
+              <tbody id="habitTableBody">
+                <!-- Dynamically rendered habit rows -->
+              </tbody>
+              <tfoot id="habitTableFoot">
+                <!-- Daily totals row -->
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Empty State (if all habits deleted/archived) -->
+          <div id="gridEmptyState" class="empty-state hidden">
+            <div class="empty-icon">🌱</div>
+            <h3>No active habits yet</h3>
+            <p>Start small. Create your first daily routine and build unstoppable momentum.</p>
+            <button class="btn-primary-action" id="emptyStateNewBtn">+ Add Your First Habit</button>
+          </div>
+        </div>
+
+        <!-- Quick tips / Pro banner bottom -->
+        <div class="pro-feature-bar">
+          <div class="pro-tip-item">
+            <span class="pro-tip-badge">Pro Tip</span>
+            <span>Right-click or Alt+Click any cell to mark a <strong>Streak Freeze</strong> (Sick/Rest day) without breaking your streak!</span>
+          </div>
+          <div class="pro-status-tag">
+            <span class="pulse-dot"></span> Unlimited Habits Active
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ANALYTICS & STREAKS (PRO UNLOCKED) -->
+      <section id="viewAnalytics" class="view-panel">
+        <div class="analytics-container">
+          <!-- Metric KPI Cards -->
+          <div class="analytics-kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Monthly Completion Rate</span>
+                <span class="kpi-icon">📊</span>
+              </div>
+              <div class="kpi-value" id="kpiRate">0%</div>
+              <div class="kpi-subtext" id="kpiRateSub">Target completions vs actual</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Goals Smashed</span>
+                <span class="kpi-icon">🎯</span>
+              </div>
+              <div class="kpi-value" id="kpiGoals">0 / 0</div>
+              <div class="kpi-subtext">Habits hitting monthly targets</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Longest Active Streak</span>
+                <span class="kpi-icon">🔥</span>
+              </div>
+              <div class="kpi-value" id="kpiStreak">0 Days</div>
+              <div class="kpi-subtext" id="kpiStreakHabit">Consistent daily action</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Total Check-ins</span>
+                <span class="kpi-icon">✅</span>
+              </div>
+              <div class="kpi-value" id="kpiTotalCheckins">0</div>
+              <div class="kpi-subtext">Lifetime positive repetitions</div>
+            </div>
+          </div>
+
+          <!-- Heatmap Section -->
+          <div class="analytics-section-card">
+            <div class="section-card-header">
+              <div class="section-title-wrap">
+                <h3 class="section-title">365-Day Consistency Matrix</h3>
+                <p class="section-desc">Visual activity heatmap across the entire year. Darker squares indicate more habits completed.</p>
+              </div>
+              <div class="heatmap-legend">
+                <span>Less</span>
+                <span class="legend-cell level-0"></span>
+                <span class="legend-cell level-1"></span>
+                <span class="legend-cell level-2"></span>
+                <span class="legend-cell level-3"></span>
+                <span class="legend-cell level-4"></span>
+                <span>More</span>
+              </div>
+            </div>
+            <div class="annual-heatmap-wrapper" id="annualHeatmapContainer">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Charts Row: Day of Week & Habit Streaks -->
+          <div class="analytics-grid-two-col">
+            <!-- Day of Week Discipline -->
+            <div class="analytics-section-card">
+              <div class="section-card-header">
+                <h3 class="section-title">Discipline by Day of Week</h3>
+                <p class="section-desc">Find your peak performance days</p>
+              </div>
+              <div class="dow-bars-container" id="dowBarsContainer">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+
+            <!-- Habit Performance Ranking -->
+            <div class="analytics-section-card">
+              <div class="section-card-header">
+                <h3 class="section-title">Habit Leaderboard & Streaks</h3>
+                <p class="section-desc">Current streaks vs all-time records</p>
+              </div>
+              <div class="leaderboard-list" id="leaderboardList">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: JOURNAL & DAILY NOTES (PRO UNLOCKED) -->
+      <section id="viewJournal" class="view-panel">
+        <div class="journal-container">
+          <div class="journal-sidebar">
+            <div class="journal-compose-card">
+              <h3 class="compose-title">Daily Reflection</h3>
+              <p class="compose-subtitle">Attach insights, feelings, or notes to any day</p>
+              
+              <div class="form-group">
+                <label for="journalDateInput">Date</label>
+                <input type="date" id="journalDateInput" class="form-input">
+              </div>
+
+              <div class="form-group">
+                <label for="journalHabitSelect">Associate with Habit (Optional)</label>
+                <select id="journalHabitSelect" class="form-select">
+                  <option value="">General Daily Note</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>How do you feel today?</label>
+                <div class="mood-selector" id="moodSelector">
+                  <button type="button" class="mood-btn active" data-mood="energized" title="Energized">⚡ Energized</button>
+                  <button type="button" class="mood-btn" data-mood="focused" title="Focused">🎯 Focused</button>
+                  <button type="button" class="mood-btn" data-mood="peaceful" title="Peaceful">🌿 Peaceful</button>
+                  <button type="button" class="mood-btn" data-mood="tired" title="Tired / Need Rest">😴 Tired</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="journalTextInput">Reflection / Thoughts</label>
+                <textarea id="journalTextInput" class="form-textarea" rows="4" placeholder="What went well today? What did you learn?"></textarea>
+              </div>
+
+              <button id="saveJournalNoteBtn" class="btn-primary-action w-full">Save Reflection</button>
+            </div>
+          </div>
+
+          <div class="journal-feed-area">
+            <div class="feed-header">
+              <h3 class="feed-title">Reflection History</h3>
+              <div class="feed-filter">
+                <input type="text" id="journalSearchInput" class="form-input form-input-sm" placeholder="Search notes...">
+              </div>
+            </div>
+            <div class="notes-feed-list" id="notesFeedList">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: GUIDE & HOW TO USE -->
+      <section id="viewGuide" class="view-panel">
+        <div class="guide-container">
+          
+          <!-- Hero Section -->
+          <div class="guide-hero">
+            <div class="guide-hero-content">
+              <div class="guide-badge-pill">💡 Complete User Manual</div>
+              <h2>How to Use DailyHabits Pro</h2>
+              <p>Build unstoppable routines, understand your consistency, protect hard-earned streaks, and master all unlocked Pro features with zero friction.</p>
+            </div>
+            <div class="guide-hero-actions">
+              <button type="button" class="btn-primary-action" id="guideNewHabitBtn">+ Create Habit</button>
+              <button type="button" class="btn-secondary-action" id="guideGoToGridBtn">Open Grid</button>
+            </div>
+          </div>
+
+          <!-- Section 1: Quick Start -->
+          <div>
+            <h3 class="guide-section-heading">Quick Start in 4 Steps</h3>
+            <p class="guide-section-desc">Everything you need to know to build your daily momentum in under 60 seconds.</p>
+            
+            <div class="guide-steps-grid">
+              <div class="guide-step-card">
+                <span class="step-number-badge">1</span>
+                <h4>Create a Habit</h4>
+                <p>Click <strong>+ New Habit</strong> (or press <kbd>N</kbd>). Give it a name, select a color & category, and pick a tracking frequency (Daily, Specific Weekdays, or Numeric target).</p>
+              </div>
+
+              <div class="guide-step-card">
+                <span class="step-number-badge">2</span>
+                <h4>One-Click Daily Check</h4>
+                <p>Click any day cell to check it off. Enjoy satisfying tactile audio feedback and watch your achieved pill counter turn vibrant emerald green when you reach your goal.</p>
+              </div>
+
+              <div class="guide-step-card">
+                <span class="step-number-badge">3</span>
+                <h4>Freeze Streaks on Rest Days</h4>
+                <p>Sick, resting, or traveling? <strong>Right-click or Alt+Click</strong> any cell to activate a <strong>Streak Freeze (🛡️)</strong>. It preserves your streak without breaking momentum.</p>
+              </div>
+
+              <div class="guide-step-card">
+                <span class="step-number-badge">4</span>
+                <h4>Reflect & Review</h4>
+                <p>Switch to <strong>Journal & Notes</strong> to record mood insights. Blue dots appear on the grid wherever a note exists so you can trace your thoughts across time.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Pro Features Deep Dive -->
+          <div>
+            <h3 class="guide-section-heading">Mastering Your Features</h3>
+            <p class="guide-section-desc">Explore the signature spreadsheet grid and unlocked tools.</p>
+
+            <div class="guide-features-grid">
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">🗓️</div>
+                <div class="feature-card-body">
+                  <h4>The Signature Habit Spreadsheet</h4>
+                  <p>A high-density monthly table designed for speed. The habit column stays pinned as you scroll horizontally. Today's date is highlighted with an accent ring, and weekends are shaded for quick visual orientation.</p>
+                  <span class="feature-pill-tag">Sticky Grid UX</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">🛡️</div>
+                <div class="feature-card-body">
+                  <h4>Streak Freeze (Skip Days)</h4>
+                  <p>In traditional habit trackers, a single missed day ruins your streak, causing psychological surrender (the <em>What-The-Hell effect</em>). Right-click any cell to place a freeze shield and keep your habit identity intact.</p>
+                  <span class="feature-pill-tag">Right-Click / Alt-Click</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">🔢</div>
+                <div class="feature-card-body">
+                  <h4>Numeric & Metric Habits</h4>
+                  <p>Track quantities rather than binary checks: e.g., 2,500 ml of water, 25 pages of reading, or 10,000 steps. Clicking a numeric cell lets you use quick stepper buttons to increment your logged amounts.</p>
+                  <span class="feature-pill-tag">Quantitative Logging</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">📊</div>
+                <div class="feature-card-body">
+                  <h4>365-Day Consistency Heatmap</h4>
+                  <p>Switch to <strong>Analytics & Streaks</strong> to view your full annual activity matrix. Darker squares highlight days with maximum routine compliance, alongside your day-of-week discipline charts.</p>
+                  <span class="feature-pill-tag">Yearly Heatmap</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">💾</div>
+                <div class="feature-card-body">
+                  <h4>100% Offline Data Freedom</h4>
+                  <p>Your habits live in your browser's local storage. Use <strong>Data & Backup</strong> to download full JSON backups, export CSV spreadsheets for Excel/Sheets, or wipe/reset data anytime.</p>
+                  <span class="feature-pill-tag">No Cloud Lock-in</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">🎨</div>
+                <div class="feature-card-body">
+                  <h4>Theme Cycling</h4>
+                  <p>Click the theme button in the top right to cycle through 5 curated aesthetic color palettes: <strong>Midnight OLED</strong>, <strong>Paper Light</strong>, <strong>Forest Sage</strong>, <strong>Nordic Ocean</strong>, and <strong>Sunset Ember</strong>.</p>
+                  <span class="feature-pill-tag">5 Color Themes</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Shortcuts & Behavioral Science -->
+          <div class="guide-two-col">
+            <!-- Left: Keyboard Shortcuts -->
+            <div class="guide-info-box">
+              <h4 class="guide-section-heading">⚡ Keyboard Shortcuts</h4>
+              <p class="guide-section-desc">Fly through your routines without touching your mouse.</p>
+
+              <table class="shortcuts-table">
+                <tbody>
+                  <tr>
+                    <td><kbd>N</kbd></td>
+                    <td>Open New Habit creator dialog</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>T</kbd></td>
+                    <td>Jump immediately to current month & today</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>&larr;</kbd> / <kbd>&rarr;</kbd></td>
+                    <td>Navigate between previous and next months</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>1</kbd></td>
+                    <td>Switch to <strong>Habit Grid</strong> view</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>2</kbd></td>
+                    <td>Switch to <strong>Analytics & Streaks</strong> view</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>3</kbd></td>
+                    <td>Switch to <strong>Journal & Notes</strong> view</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>4</kbd></td>
+                    <td>Switch to this <strong>How to Use</strong> guide</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>?</kbd></td>
+                    <td>Toggle keyboard shortcuts help dialog</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>Esc</kbd></td>
+                    <td>Dismiss any active modal or menu</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right: Habit Philosophy -->
+            <div class="guide-info-box">
+              <h4 class="guide-section-heading">🧠 Science of Habits</h4>
+              <p class="guide-section-desc">Proven strategies from behavioral psychology.</p>
+
+              <div class="philosophy-list">
+                <div class="philosophy-item">
+                  <span class="philosophy-icon">🌱</span>
+                  <div class="philosophy-text">
+                    <h5>Start Ridiculously Small</h5>
+                    <p>Make the barrier to entry tiny: read 2 pages or do 5 pushups. Consistency creates the identity; volume follows naturally.</p>
+                  </div>
+                </div>
+
+                <div class="philosophy-item">
+                  <span class="philosophy-icon">🔗</span>
+                  <div class="philosophy-text">
+                    <h5>Habit Stacking</h5>
+                    <p>Pair a new habit with an existing one: <em>"After I pour my morning coffee [Current], I will meditate for 3 minutes [New]."</em></p>
+                  </div>
+                </div>
+
+                <div class="philosophy-item">
+                  <span class="philosophy-icon">✌️</span>
+                  <div class="philosophy-text">
+                    <h5>The Two-Day Rule</h5>
+                    <p>Never miss two days in a row. If life happens and you miss today, use Streak Freeze or prioritize completing just 1 minute tomorrow.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- MODAL: ADD / EDIT HABIT -->
+    <div id="habitModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h2 id="modalTitle" class="modal-heading">Add New Habit</h2>
+          <button id="closeHabitModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+        
+        <form id="habitForm" class="modal-form">
+          <input type="hidden" id="editHabitId" value="">
+
+          <div class="form-group">
+            <label for="habitTitleInput">Habit Name <span class="required-star">*</span></label>
+            <input type="text" id="habitTitleInput" class="form-input" placeholder="e.g., Morning Meditation, Read 20 Pages" required autofocus>
+          </div>
+
+          <div class="form-row-two">
+            <div class="form-group">
+              <label for="habitCategorySelect">Category</label>
+              <select id="habitCategorySelect" class="form-select">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Accent Color</label>
+              <div class="color-picker-grid" id="colorPickerGrid">
+                <!-- Dynamically populated color swatches -->
+              </div>
+              <input type="hidden" id="habitSelectedColor" value="#10b981">
+            </div>
+          </div>
+
+          <!-- Goal Frequency Type (PRO feature) -->
+          <div class="form-group">
+            <label>Tracking Frequency & Goal Type</label>
+            <div class="goal-type-selector" id="goalTypeSelector">
+              <label class="goal-radio-card">
+                <input type="radio" name="goalType" value="daily" checked>
+                <div class="goal-radio-content">
+                  <span class="radio-title">Standard Checkbox</span>
+                  <span class="radio-desc">Daily yes/no checkmark</span>
+                </div>
+              </label>
+
+              <label class="goal-radio-card">
+                <input type="radio" name="goalType" value="specific_days">
+                <div class="goal-radio-content">
+                  <span class="radio-title">Specific Weekdays</span>
+                  <span class="radio-desc">e.g., Mon, Wed, Fri</span>
+                </div>
+              </label>
+
+              <label class="goal-radio-card">
+                <input type="radio" name="goalType" value="numeric">
+                <div class="goal-radio-content">
+                  <span class="radio-title">Numeric Target</span>
+                  <span class="radio-desc">e.g., 2500 ml water, 30 pgs</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Conditional: Specific Days selection -->
+          <div id="specificDaysGroup" class="form-group hidden">
+            <label>Target Days of the Week</label>
+            <div class="weekdays-select-row">
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="1" checked> <span>Mon</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="2" checked> <span>Tue</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="3" checked> <span>Wed</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="4" checked> <span>Thu</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="5" checked> <span>Fri</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="6"> <span>Sat</span></label>
+              <label class="day-chip"><input type="checkbox" name="weekDay" value="0"> <span>Sun</span></label>
+            </div>
+          </div>
+
+          <!-- Conditional: Numeric details -->
+          <div id="numericTargetGroup" class="form-row-two hidden">
+            <div class="form-group">
+              <label for="numericTargetVal">Daily Target Amount</label>
+              <input type="number" id="numericTargetVal" class="form-input" min="1" value="20" placeholder="e.g. 20">
+            </div>
+            <div class="form-group">
+              <label for="numericUnitVal">Unit of Measurement</label>
+              <input type="text" id="numericUnitVal" class="form-input" value="pages" placeholder="e.g. pages, ml, mins">
+            </div>
+          </div>
+
+          <!-- Monthly Target Days -->
+          <div class="form-group">
+            <label for="habitGoalDaysInput">Monthly Target (Days to achieve)</label>
+            <div class="range-input-wrap">
+              <input type="range" id="habitGoalDaysRange" min="1" max="31" value="25" class="form-range">
+              <span id="goalDaysDisplay" class="range-value-pill">25 days</span>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="deleteHabitModalBtn" class="btn-danger-ghost hidden">Delete Habit</button>
+            <div class="footer-actions-right">
+              <button type="button" id="cancelHabitModalBtn" class="btn-secondary-ghost">Cancel</button>
+              <button type="submit" class="btn-primary-action">Save Habit</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: NUMERIC CELL INPUT & NOTE -->
+    <div id="cellDetailModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-sm">
+        <div class="modal-header">
+          <div>
+            <h3 id="cellDetailTitle" class="modal-heading">Log Progress</h3>
+            <span id="cellDetailSubtitle" class="modal-subheading">September 20, 2026</span>
+          </div>
+          <button id="closeCellDetailModalBtn" class="modal-close-btn">&times;</button>
+        </div>
+
+        <form id="cellDetailForm" class="modal-form">
+          <div id="cellNumericInputWrap" class="form-group">
+            <label for="cellNumericValue" id="cellNumericLabel">Amount Completed</label>
+            <div class="numeric-input-stepper">
+              <button type="button" class="stepper-btn" id="cellStepMinus">-</button>
+              <input type="number" id="cellNumericValue" class="form-input text-center" step="any">
+              <button type="button" class="stepper-btn" id="cellStepPlus">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="cellNoteInput">Day Note / Reflection (Optional)</label>
+            <textarea id="cellNoteInput" class="form-textarea" rows="2" placeholder="Any thoughts on today's session?"></textarea>
+          </div>
+
+          <div class="quick-status-row">
+            <button type="button" id="cellSetFreezeBtn" class="btn-secondary-ghost btn-sm">🛡️ Set Streak Freeze</button>
+            <button type="button" id="cellClearBtn" class="btn-danger-ghost btn-sm">Clear Check</button>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" id="cancelCellDetailBtn" class="btn-secondary-ghost">Cancel</button>
+            <button type="submit" class="btn-primary-action">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: KEYBOARD SHORTCUTS -->
+    <div id="shortcutsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <div class="modal-dialog modal-dialog-sm">
+        <div class="modal-header">
+          <h3 class="modal-heading">Keyboard Shortcuts</h3>
+          <button id="closeShortcutsModalBtn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="shortcuts-list">
+          <div class="shortcut-item"><kbd>N</kbd> <span>Create new habit</span></div>
+          <div class="shortcut-item"><kbd>T</kbd> <span>Jump to current month / today</span></div>
+          <div class="shortcut-item"><kbd>&larr;</kbd> / <kbd>&rarr;</kbd> <span>Previous / Next month</span></div>
+          <div class="shortcut-item"><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> <span>Switch views (Grid, Analytics, Journal, Guide)</span></div>
+          <div class="shortcut-item"><kbd>?</kbd> <span>Open this shortcuts help</span></div>
+          <div class="shortcut-item"><kbd>Esc</kbd> <span>Close any modal</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: DATA MANAGEMENT (EXPORT, IMPORT, RESET) -->
+    <div id="dataModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dataModalTitle">
+      <div class="modal-dialog modal-dialog-md">
+        <div class="modal-header">
+          <div>
+            <h2 id="dataModalTitle" class="modal-heading">Data Management</h2>
+            <p class="modal-subheading">100% private & local. Export, import, or reset your habits anytime.</p>
+          </div>
+          <button id="closeDataModalBtn" class="modal-close-btn">&times;</button>
+        </div>
+
+        <!-- Tabs inside Data Modal -->
+        <div class="data-tabs-bar">
+          <button type="button" class="data-tab-btn active" data-tab="export">📤 Export Data</button>
+          <button type="button" class="data-tab-btn" data-tab="import">📥 Import Data</button>
+          <button type="button" class="data-tab-btn danger" data-tab="reset">⚠️ Reset Data</button>
+        </div>
+
+        <!-- 1. Export Tab Content -->
+        <div id="dataTabExport" class="data-tab-content active">
+          <div class="data-card-grid">
+            <div class="data-action-card">
+              <div class="data-card-icon">💾</div>
+              <div class="data-card-info">
+                <h4>Full JSON Backup</h4>
+                <p>Export all habits, completion history, daily reflections, and settings into one JSON file.</p>
+              </div>
+              <button type="button" id="dataExportJsonBtn" class="btn-primary-action btn-sm">Download Backup (JSON)</button>
+            </div>
+
+            <div class="data-action-card">
+              <div class="data-card-icon">📊</div>
+              <div class="data-card-info">
+                <h4>Current Month (CSV)</h4>
+                <p>Export the current month's table format ready for Excel, Numbers, or Google Sheets.</p>
+              </div>
+              <button type="button" id="dataExportMonthCsvBtn" class="btn-secondary-ghost btn-sm">Export Month CSV</button>
+            </div>
+
+            <div class="data-action-card">
+              <div class="data-card-icon">📈</div>
+              <div class="data-card-info">
+                <h4>All-Time History (CSV)</h4>
+                <p>Export your full chronological check-in history across all months and years.</p>
+              </div>
+              <button type="button" id="dataExportAllCsvBtn" class="btn-secondary-ghost btn-sm">Export Lifetime CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Import Tab Content -->
+        <div id="dataTabImport" class="data-tab-content">
+          <div class="import-drop-zone" id="importDropZone">
+            <div class="drop-zone-icon">📁</div>
+            <h4>Drag & Drop your backup JSON file here</h4>
+            <p>or <button type="button" id="browseJsonBtn" class="link-btn">browse file from device</button></p>
+            <span id="importFileStatus" class="import-file-status hidden"></span>
+          </div>
+
+          <div class="or-divider"><span>OR PASTE BACKUP JSON CODE</span></div>
+
+          <textarea id="importJsonTextarea" class="form-textarea" rows="4" placeholder='Paste your backup JSON content here...'></textarea>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label>Import Method</label>
+            <div class="goal-type-selector">
+              <label class="goal-radio-card">
+                <input type="radio" name="importModeChoice" value="replace" checked>
+                <div class="goal-radio-content">
+                  <span class="radio-title">Replace All Current Data</span>
+                  <span class="radio-desc">Cleanly overwrites all current habits with the imported backup</span>
+                </div>
+              </label>
+              <label class="goal-radio-card">
+                <input type="radio" name="importModeChoice" value="merge">
+                <div class="goal-radio-content">
+                  <span class="radio-title">Merge with Current Habits</span>
+                  <span class="radio-desc">Combines incoming habits with your existing active routines</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="margin-top: 16px;">
+            <button type="button" id="executeImportBtn" class="btn-primary-action w-full">Apply & Restore Import</button>
+          </div>
+        </div>
+
+        <!-- 3. Reset Tab Content (Danger Zone) -->
+        <div id="dataTabReset" class="data-tab-content">
+          <div class="danger-box">
+            <div class="danger-header">
+              <span class="danger-icon">⚠️</span>
+              <div>
+                <h4>Danger Zone: Reset Actions</h4>
+                <p>These actions modify or erase your local tracking data. Export a backup first if needed.</p>
+              </div>
+            </div>
+
+            <div class="danger-options-list">
+              <!-- Reset to Demo -->
+              <div class="danger-option-item">
+                <div class="danger-option-text">
+                  <h5>Reset to Demo Starter Routines</h5>
+                  <p>Replaces current data with realistic starter habits (Sunlight walk, Deep work, Reading, Water, Gym, Meditation).</p>
+                </div>
+                <button type="button" id="dangerResetDemoBtn" class="btn-secondary-ghost text-gold">Reset to Demo</button>
+              </div>
+
+              <!-- Wipe Entirely -->
+              <div class="danger-option-item">
+                <div class="danger-option-text">
+                  <h5 class="text-danger">Wipe / Clear Whole Data (Blank Canvas)</h5>
+                  <p>Permanently deletes all habits, completion history, and reflections. Starts completely fresh with 0 habits.</p>
+                </div>
+                <button type="button" id="dangerWipeAllBtn" class="btn-danger-ghost">Wipe All Data</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MODAL: CONFIRMATION DIALOG -->
+    <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+      <div class="modal-dialog modal-dialog-sm confirm-dialog">
+        <div class="confirm-icon-wrap" id="confirmIconWrap">
+          <span id="confirmIcon">⚠️</span>
+        </div>
+        <div class="confirm-body">
+          <h3 id="confirmModalTitle" class="confirm-title">Are you sure?</h3>
+          <p id="confirmModalMessage" class="confirm-message">This action cannot be undone.</p>
+        </div>
+        <div class="confirm-actions">
+          <button type="button" id="confirmCancelBtn" class="btn-secondary-ghost">Cancel</button>
+          <button type="button" id="confirmProceedBtn" class="btn-danger-action">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input for JSON import -->
+    <input type="file" id="jsonFileInput" accept=".json,application/json" class="hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+  </div>
+
+  <!-- Main JavaScript bundle -->
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
