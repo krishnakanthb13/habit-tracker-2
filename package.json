@@ -1,0 +1,23 @@
+{
+  "name": "daily-habits-tracker",
+  "version": "1.0.0",
+  "description": "Ultra-lightweight daily habit tracker with all paywalled features unlocked",
+  "author": "Krishna Kanth B (https://github.com/krishnakanthb13)",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krishnakanthb13/habit-tracker-2.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.4.2"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  }
+}
