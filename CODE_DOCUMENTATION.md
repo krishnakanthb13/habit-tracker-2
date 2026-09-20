@@ -30,7 +30,8 @@ habit-tracker-2/
 ├── launch.sh                        # Automated Unix/macOS build & execution launcher
 ├── LICENSE                          # GNU General Public License v3.0
 ├── package.json                     # Vite and canvas-confetti dependencies
-└── README.md                        # Project overview, quickstart, and feature breakdown
+├── README.md                        # Project overview, quickstart, and feature breakdown
+└── vercel.json                      # Vercel deployment, SPA rewrites, and security headers
 ```
 
 ---

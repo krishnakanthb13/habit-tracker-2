@@ -32,6 +32,14 @@ npm run dev
 ```
 Open **`http://127.0.0.1:5173/`** in your browser.
 
+### 🚀 Deploy to the Web (1-Click Vercel)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fkrishnakanthb13%2Fhabit-tracker-2)
+
+Or deploy via terminal:
+```bash
+npx vercel
+```
+
 ---
 
 ## ✨ Features
