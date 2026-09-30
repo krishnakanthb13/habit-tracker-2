@@ -1,6 +1,20 @@
-// src/app.js - Main Application Controller for DailyHabits Pro
+// Safe confetti trigger supporting both browser global (window.confetti) and environments with/without bundlers
+function triggerCelebrationConfetti(options = {}) {
+  const confettiFn = (typeof window !== 'undefined' && typeof window.confetti === 'function') ? window.confetti : null;
+  if (confettiFn) {
+    try {
+      confettiFn({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        ...options
+      });
+    } catch (e) {
+      console.warn('Confetti animation error:', e);
+    }
+  }
+}
 
-import confetti from 'canvas-confetti';
 import {
   loadAppData,
   saveAppData,
@@ -127,6 +141,7 @@ const emptyStateNewBtn = document.getElementById('emptyStateNewBtn');
 const closeHabitModalBtn = document.getElementById('closeHabitModalBtn');
 const cancelHabitModalBtn = document.getElementById('cancelHabitModalBtn');
 const deleteHabitModalBtn = document.getElementById('deleteHabitModalBtn');
+const archiveHabitModalBtn = document.getElementById('archiveHabitModalBtn');
 const habitForm = document.getElementById('habitForm');
 const modalTitle = document.getElementById('modalTitle');
 const editHabitId = document.getElementById('editHabitId');
@@ -179,6 +194,30 @@ const notesFeedList = document.getElementById('notesFeedList');
 const journalSearchInput = document.getElementById('journalSearchInput');
 const moodSelector = document.getElementById('moodSelector');
 
+// Archived Vault DOM Elements
+const dataModalArchivedCount = document.getElementById('dataModalArchivedCount');
+const dataTabArchived = document.getElementById('dataTabArchived');
+const dataArchivedList = document.getElementById('dataArchivedList');
+const restoreAllArchivedBtn = document.getElementById('restoreAllArchivedBtn');
+
+// Category Manager DOM Elements
+const openCategoryModalBtn = document.getElementById('openCategoryModalBtn');
+const proToolsCategoriesBtn = document.getElementById('proToolsCategoriesBtn');
+const habitModalManageCatBtn = document.getElementById('habitModalManageCatBtn');
+const categoryModal = document.getElementById('categoryModal');
+const closeCategoryModalBtn = document.getElementById('closeCategoryModalBtn');
+const closeCategoryModalFooterBtn = document.getElementById('closeCategoryModalFooterBtn');
+const categoryForm = document.getElementById('categoryForm');
+const categoryEditId = document.getElementById('categoryEditId');
+const categoryFormModeTitle = document.getElementById('categoryFormModeTitle');
+const cancelCategoryEditBtn = document.getElementById('cancelCategoryEditBtn');
+const categoryNameInput = document.getElementById('categoryNameInput');
+const categoryColorSwatches = document.getElementById('categoryColorSwatches');
+const categorySelectedColor = document.getElementById('categorySelectedColor');
+const saveCategoryBtn = document.getElementById('saveCategoryBtn');
+const categoryTotalCount = document.getElementById('categoryTotalCount');
+const categoriesManageList = document.getElementById('categoriesManageList');
+
 // Month Names
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -188,20 +227,43 @@ const MONTH_NAMES = [
 const DAY_NAMES_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 // Global Toast Notification
-export function showToast(message, type = 'success') {
+export function showToast(message, type = 'success', action = null) {
   const container = document.getElementById('toastContainer');
   if (!container) return;
   const toast = document.createElement('div');
   toast.className = `toast-item toast-${type}`;
   const icon = type === 'success' ? '✅' : type === 'warn' ? '⚠️' : '❌';
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+
+  const contentSpan = document.createElement('span');
+  contentSpan.className = 'toast-content';
+  contentSpan.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  toast.appendChild(contentSpan);
+
+  if (action && action.text && typeof action.onClick === 'function') {
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'toast-action-btn';
+    actionBtn.textContent = action.text;
+    actionBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      action.onClick();
+      dismissToast(toast);
+    });
+    toast.appendChild(actionBtn);
+  }
+
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'all 0.3s ease';
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+
+  function dismissToast(el) {
+    if (el.dataset.dismissed) return;
+    el.dataset.dismissed = 'true';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(10px)';
+    el.style.transition = 'all 0.3s ease';
+    setTimeout(() => el.remove(), 300);
+  }
+
+  setTimeout(() => dismissToast(toast), action ? 6000 : 3500);
 }
 
 // In-App Confirmation Dialog (Promise-based)
@@ -260,6 +322,9 @@ export function showConfirmation({
 // INITIALIZATION
 // ==========================================
 function init() {
+  if (!appData.categories || !Array.isArray(appData.categories) || appData.categories.length === 0) {
+    appData.categories = JSON.parse(JSON.stringify(CATEGORIES));
+  }
   applyTheme(settings.theme);
   updateSoundIcon();
   setupEventListeners();
@@ -366,10 +431,16 @@ function jumpToToday() {
 
 function updateView() {
   currentMonthLabel.textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
+  const archivedCount = appData.habits.filter(h => h.archived).length;
+  if (proToolsArchivedCount) proToolsArchivedCount.textContent = archivedCount;
+  if (dataModalArchivedCount) dataModalArchivedCount.textContent = archivedCount;
+
+  populateCategorySelect();
   renderHabitGrid();
   renderCategoryChips();
   if (activeView === 'analytics') renderAnalytics();
   if (activeView === 'journal') renderJournal();
+  renderDataModalArchivedList();
 }
 
 // ==========================================
@@ -380,8 +451,18 @@ function renderHabitGrid() {
   const isCurrentMonth = todayDate.getFullYear() === viewYear && todayDate.getMonth() === viewMonth;
   const currentDay = todayDate.getDate();
 
+  const isArchivedView = settings.activeCategory === 'archived';
+  const archivedHabitsCount = appData.habits.filter(h => h.archived).length;
+
+  // If user was on 'archived' view but there are no archived habits left, switch back to 'all'
+  if (isArchivedView && archivedHabitsCount === 0) {
+    settings.activeCategory = 'all';
+    saveSettings(settings);
+  }
+
   // Filter habits
   const activeHabits = appData.habits.filter(h => {
+    if (settings.activeCategory === 'archived') return Boolean(h.archived);
     if (h.archived) return false;
     if (settings.activeCategory !== 'all' && h.category !== settings.activeCategory) return false;
     return true;
@@ -390,14 +471,57 @@ function renderHabitGrid() {
   if (activeHabits.length === 0) {
     gridEmptyState.classList.remove('hidden');
     document.getElementById('gridScrollWrapper').classList.add('hidden');
+
+    if (settings.activeCategory === 'archived') {
+      gridEmptyState.innerHTML = `
+        <div class="empty-icon">📦</div>
+        <h3>No archived habits</h3>
+        <p>Your archived habits vault is empty. Habits you retire will be preserved here.</p>
+        <button class="btn-primary-action" id="emptyStateBackToAllBtn">← Back to Active Habits</button>
+      `;
+      const backBtn = document.getElementById('emptyStateBackToAllBtn');
+      if (backBtn) backBtn.addEventListener('click', () => {
+        settings.activeCategory = 'all';
+        saveSettings(settings);
+        updateView();
+      });
+    } else if (archivedHabitsCount > 0) {
+      gridEmptyState.innerHTML = `
+        <div class="empty-icon">🌱</div>
+        <h3>No active habits in this view</h3>
+        <p>You have ${archivedHabitsCount} archived habit${archivedHabitsCount > 1 ? 's' : ''} in your vault. Create a new habit or unarchive your routines anytime.</p>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
+          <button class="btn-primary-action" id="emptyStateNewBtn">+ Add New Habit</button>
+          <button class="btn-secondary-action" id="emptyStateViewArchivedBtn">📦 View Archived Vault (${archivedHabitsCount})</button>
+        </div>
+      `;
+      const newBtn = document.getElementById('emptyStateNewBtn');
+      if (newBtn) newBtn.addEventListener('click', () => openHabitModal(null));
+      const viewArchivedBtn = document.getElementById('emptyStateViewArchivedBtn');
+      if (viewArchivedBtn) viewArchivedBtn.addEventListener('click', () => {
+        settings.activeCategory = 'archived';
+        saveSettings(settings);
+        updateView();
+      });
+    } else {
+      gridEmptyState.innerHTML = `
+        <div class="empty-icon">🌱</div>
+        <h3>No active habits yet</h3>
+        <p>Start small. Create your first daily routine and build unstoppable momentum.</p>
+        <button class="btn-primary-action" id="emptyStateNewBtn">+ Add Your First Habit</button>
+      `;
+      const newBtn = document.getElementById('emptyStateNewBtn');
+      if (newBtn) newBtn.addEventListener('click', () => openHabitModal(null));
+    }
   } else {
     gridEmptyState.classList.add('hidden');
     document.getElementById('gridScrollWrapper').classList.remove('hidden');
   }
 
   // 1. Table Header
+  const colTitle = settings.activeCategory === 'archived' ? 'Archived Habit' : 'Habit';
   let headHtml = `<tr>
-    <th class="th-habit-name">Habit (${activeHabits.length})</th>`;
+    <th class="th-habit-name">${colTitle} (${activeHabits.length})</th>`;
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dayDate = new Date(viewYear, viewMonth, d);
@@ -435,14 +559,21 @@ function renderHabitGrid() {
     const streakData = calculateStreak(habit);
     const goal = habit.goalDays || daysInMonth;
 
+    const catObj = (appData.categories || CATEGORIES).find(c => c.id === habit.category);
+    const catName = catObj ? escapeHtml(catObj.name) : escapeHtml(habit.category || 'General');
+    const catColor = catObj ? catObj.color : habit.color;
+
     let rowHtml = `<tr class="habit-row" data-habit-id="${habit.id}">
       <td class="td-habit-info">
         <div class="habit-title-container">
           <span class="habit-color-indicator" style="background-color: ${habit.color}"></span>
           <div class="habit-text-wrap">
-            <span class="habit-name-label" title="${habit.title}">${habit.title}</span>
+            <span class="habit-name-label" title="${escapeHtml(habit.title)}">
+              ${escapeHtml(habit.title)}
+              ${habit.archived ? '<span class="badge-archived">Archived</span>' : ''}
+            </span>
             <div class="habit-meta-row">
-              <span class="habit-category-tag">${habit.category}</span>
+              <span class="habit-category-tag" style="border-left: 2px solid ${catColor};">${catName}</span>
               ${habit.frequencyType === 'numeric' && habit.targetMetric ? 
                 `<span class="habit-metric-tag">${habit.targetMetric.target} ${habit.targetMetric.unit}</span>` : ''}
               ${habit.frequencyType === 'specific_days' ? 
@@ -537,10 +668,16 @@ function renderHabitGrid() {
           <button class="btn-row-action edit-habit-btn" data-id="${habit.id}" title="Edit habit">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
           </button>
+          ${habit.archived ? `
+          <button class="btn-row-action text-success unarchive-habit-btn" data-id="${habit.id}" title="Restore / Unarchive habit to active tracker">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </button>
+          ` : `
           <button class="btn-row-action archive-habit-btn" data-id="${habit.id}" title="Archive habit">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
           </button>
-          <button class="btn-row-action delete-action delete-habit-btn" data-id="${habit.id}" title="Delete habit">
+          `}
+          <button class="btn-row-action delete-action delete-habit-btn" data-id="${habit.id}" title="Delete habit permanently">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
@@ -564,8 +701,12 @@ function renderHabitGrid() {
   habitTableFoot.innerHTML = footHtml;
 
   // Update header stats summary
-  const monthStats = calculateMonthStats(appData.habits, viewYear, viewMonth);
-  headerStatsSummary.textContent = `${activeHabits.length} Habits • ${monthStats.overallRate}% Consistency this month`;
+  if (settings.activeCategory === 'archived') {
+    headerStatsSummary.innerHTML = `<span class="badge-archived">Archived Vault</span> Viewing ${activeHabits.length} archived routine${activeHabits.length !== 1 ? 's' : ''}`;
+  } else {
+    const monthStats = calculateMonthStats(appData.habits, viewYear, viewMonth);
+    headerStatsSummary.textContent = `${activeHabits.length} Habits • ${monthStats.overallRate}% Consistency this month`;
+  }
 }
 
 // Handle Check Toggle
@@ -663,7 +804,7 @@ function isHabitGoalMet(habit) {
 function celebrateGoalAchieved(habit) {
   if (settings.soundEnabled) playGoalReachedSound();
   if (settings.confettiEnabled) {
-    confetti({
+    triggerCelebrationConfetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 }
@@ -675,15 +816,20 @@ function celebrateGoalAchieved(habit) {
 // CATEGORIES & SWATCHES
 // ==========================================
 function populateCategorySelect() {
-  habitCategorySelect.innerHTML = CATEGORIES.map(cat => `
-    <option value="${cat.id}">${cat.name}</option>
+  const cats = appData.categories || CATEGORIES;
+  habitCategorySelect.innerHTML = cats.map(cat => `
+    <option value="${cat.id}">${escapeHtml(cat.name)}</option>
   `).join('');
 }
 
 function renderCategoryChips() {
-  const counts = { all: appData.habits.filter(h => !h.archived).length };
-  CATEGORIES.forEach(c => {
-    counts[c.id] = appData.habits.filter(h => !h.archived && h.category === c.id).length;
+  const cats = appData.categories || CATEGORIES;
+  const activeOnly = appData.habits.filter(h => !h.archived);
+  const archivedCount = appData.habits.filter(h => h.archived).length;
+
+  const counts = { all: activeOnly.length };
+  cats.forEach(c => {
+    counts[c.id] = activeOnly.filter(h => h.category === c.id).length;
   });
 
   let chipsHtml = `
@@ -692,18 +838,210 @@ function renderCategoryChips() {
     </button>
   `;
 
-  CATEGORIES.forEach(cat => {
+  cats.forEach(cat => {
     if (counts[cat.id] > 0 || settings.activeCategory === cat.id) {
       chipsHtml += `
         <button class="category-chip ${settings.activeCategory === cat.id ? 'active' : ''}" data-cat="${cat.id}">
           <span class="category-chip-dot" style="background-color: ${cat.color}"></span>
-          ${cat.name} (${counts[cat.id] || 0})
+          ${escapeHtml(cat.name)} (${counts[cat.id] || 0})
         </button>
       `;
     }
   });
 
+  if (archivedCount > 0 || settings.activeCategory === 'archived') {
+    chipsHtml += `
+      <button class="category-chip archived-chip ${settings.activeCategory === 'archived' ? 'active' : ''}" data-cat="archived" title="View and restore archived routines">
+        📦 Archived (${archivedCount})
+      </button>
+    `;
+  }
+
   categoryChips.innerHTML = chipsHtml;
+}
+
+// ==========================================
+// CATEGORY MANAGEMENT
+// ==========================================
+function openCategoryModal() {
+  cancelCategoryEdit();
+  renderCategorySwatches();
+  renderCategoryManageList();
+  if (categoryModal) categoryModal.classList.remove('hidden');
+  if (proToolsDropdown) proToolsDropdown.classList.add('hidden');
+  setTimeout(() => { if (categoryNameInput) categoryNameInput.focus(); }, 50);
+}
+
+function closeCategoryModal() {
+  if (categoryModal) categoryModal.classList.add('hidden');
+  cancelCategoryEdit();
+}
+
+function renderCategorySwatches() {
+  if (!categoryColorSwatches) return;
+  categoryColorSwatches.innerHTML = HABIT_COLORS.map(color => `
+    <button type="button" 
+      class="category-swatch-btn ${categorySelectedColor.value === color ? 'selected' : ''}" 
+      style="background-color: ${color}" 
+      data-color="${color}" 
+      aria-label="Color ${color}">
+    </button>
+  `).join('');
+}
+
+function renderCategoryManageList() {
+  if (!categoriesManageList) return;
+  const cats = appData.categories || CATEGORIES;
+  if (categoryTotalCount) categoryTotalCount.textContent = cats.length;
+
+  if (cats.length === 0) {
+    categoriesManageList.innerHTML = `
+      <div class="empty-state" style="padding: 16px;">
+        <p>No categories found. Add your first category above.</p>
+      </div>
+    `;
+    return;
+  }
+
+  categoriesManageList.innerHTML = cats.map(cat => {
+    const usageCount = appData.habits.filter(h => h.category === cat.id).length;
+    const isEditing = categoryEditId.value === cat.id;
+
+    return `
+      <div class="category-manage-card ${isEditing ? 'is-editing' : ''}" data-id="${cat.id}">
+        <div class="category-manage-left">
+          <span class="category-dot-preview" style="background-color: ${cat.color}"></span>
+          <span class="category-manage-name" title="${escapeHtml(cat.name)}">${escapeHtml(cat.name)}</span>
+          <span class="category-manage-count">${usageCount} ${usageCount === 1 ? 'habit' : 'habits'}</span>
+        </div>
+        <div class="category-manage-actions">
+          <button type="button" class="btn-icon-ghost edit-category-btn" data-id="${cat.id}" title="Edit Category" aria-label="Edit Category">
+            ✏️
+          </button>
+          <button type="button" class="btn-icon-ghost text-danger delete-category-btn" data-id="${cat.id}" title="Delete Category" aria-label="Delete Category">
+            🗑️
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setCategoryEditMode(catId) {
+  const cats = appData.categories || CATEGORIES;
+  const target = cats.find(c => c.id === catId);
+  if (!target) return;
+
+  categoryEditId.value = target.id;
+  categoryNameInput.value = target.name;
+  categorySelectedColor.value = target.color;
+  categoryFormModeTitle.textContent = `Editing "${target.name}"`;
+  saveCategoryBtn.textContent = 'Save Changes';
+  cancelCategoryEditBtn.classList.remove('hidden');
+
+  renderCategorySwatches();
+  renderCategoryManageList();
+  categoryNameInput.focus();
+}
+
+function cancelCategoryEdit() {
+  if (categoryEditId) categoryEditId.value = '';
+  if (categoryNameInput) categoryNameInput.value = '';
+  if (categorySelectedColor) categorySelectedColor.value = HABIT_COLORS[0];
+  if (categoryFormModeTitle) categoryFormModeTitle.textContent = '+ Add New Category';
+  if (saveCategoryBtn) saveCategoryBtn.textContent = '+ Add Category';
+  if (cancelCategoryEditBtn) cancelCategoryEditBtn.classList.add('hidden');
+  renderCategorySwatches();
+  renderCategoryManageList();
+}
+
+function handleCategoryFormSubmit(e) {
+  e.preventDefault();
+  const name = categoryNameInput.value.trim();
+  if (!name) return;
+
+  const color = categorySelectedColor.value || HABIT_COLORS[0];
+  if (!appData.categories) appData.categories = JSON.parse(JSON.stringify(CATEGORIES));
+
+  const editId = categoryEditId.value;
+
+  if (editId) {
+    // Edit existing category
+    const cat = appData.categories.find(c => c.id === editId);
+    if (cat) {
+      cat.name = name;
+      cat.color = color;
+      showToast(`Category "${name}" updated!`, 'success');
+    }
+  } else {
+    // Add new category
+    const exists = appData.categories.some(c => c.name.toLowerCase() === name.toLowerCase());
+    if (exists) {
+      showToast(`A category named "${name}" already exists.`, 'warn');
+      return;
+    }
+
+    const newId = 'cat_' + Date.now().toString(36) + '_' + Math.floor(Math.random() * 100);
+    appData.categories.push({
+      id: newId,
+      name,
+      color
+    });
+    showToast(`Category "${name}" created!`, 'success');
+  }
+
+  saveAppData(appData);
+  cancelCategoryEdit();
+  updateView();
+}
+
+async function handleDeleteCategory(catId) {
+  if (!appData.categories) appData.categories = JSON.parse(JSON.stringify(CATEGORIES));
+  if (appData.categories.length <= 1) {
+    showToast('You must have at least one category.', 'warn');
+    return;
+  }
+
+  const cat = appData.categories.find(c => c.id === catId);
+  if (!cat) return;
+
+  const affectedHabits = appData.habits.filter(h => h.category === catId);
+  const fallbackCat = appData.categories.find(c => c.id !== catId) || appData.categories[0];
+
+  let message = `Are you sure you want to delete "${cat.name}"?`;
+  if (affectedHabits.length > 0) {
+    message += `\n\n${affectedHabits.length} habit(s) currently tagged with this category will be moved to "${fallbackCat.name}".`;
+  }
+
+  const confirmed = await showConfirmation({
+    title: 'Delete Category',
+    message,
+    icon: '🗑️',
+    confirmText: 'Delete Category',
+    confirmType: 'danger'
+  });
+
+  if (!confirmed) return;
+
+  // Reassign habits
+  affectedHabits.forEach(h => {
+    h.category = fallbackCat.id;
+  });
+
+  // Remove category
+  appData.categories = appData.categories.filter(c => c.id !== catId);
+
+  // If active filter was this category, reset to 'all'
+  if (settings.activeCategory === catId) {
+    settings.activeCategory = 'all';
+    saveSettings(settings);
+  }
+
+  saveAppData(appData);
+  if (categoryEditId && categoryEditId.value === catId) cancelCategoryEdit();
+  updateView();
+  renderCategoryManageList();
+  showToast(`Category "${cat.name}" deleted.`, 'info');
 }
 
 function renderColorSwatches() {
@@ -733,6 +1071,19 @@ function openHabitModal(habit = null) {
     goalDaysDisplay.textContent = `${habit.goalDays || 25} days`;
     deleteHabitModalBtn.classList.remove('hidden');
 
+    if (archiveHabitModalBtn) {
+      archiveHabitModalBtn.classList.remove('hidden');
+      if (habit.archived) {
+        archiveHabitModalBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Restore to Active`;
+        archiveHabitModalBtn.className = 'btn-secondary-ghost text-success';
+        archiveHabitModalBtn.title = 'Unarchive this habit and restore to active grid';
+      } else {
+        archiveHabitModalBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg> Archive Habit`;
+        archiveHabitModalBtn.className = 'btn-secondary-ghost text-gold';
+        archiveHabitModalBtn.title = 'Archive this habit (pause & hide from grid)';
+      }
+    }
+
     // Radio
     const radio = habitForm.querySelector(`input[name="goalType"][value="${habit.frequencyType || 'daily'}"]`);
     if (radio) radio.checked = true;
@@ -761,6 +1112,7 @@ function openHabitModal(habit = null) {
     habitGoalDaysRange.value = 25;
     goalDaysDisplay.textContent = '25 days';
     deleteHabitModalBtn.classList.add('hidden');
+    if (archiveHabitModalBtn) archiveHabitModalBtn.classList.add('hidden');
     specificDaysGroup.classList.add('hidden');
     numericTargetGroup.classList.add('hidden');
   }
@@ -911,19 +1263,6 @@ function handleCellDetailSubmit(e) {
 // QUICK REFLECTION / DAILY NOTE MODAL
 // ==========================================
 function openQuickNoteModal(prefillDate = null, prefillHabitId = null, noteId = null) {
-  // Populate habits select dropdown
-  quickNoteHabitSelect.innerHTML = `<option value="">General Daily Note</option>` +
-    appData.habits.filter(h => !h.archived).map(h => `<option value="${h.id}">${h.title}</option>`).join('');
-
-  const targetDate = prefillDate || formatDateKey(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
-  quickNoteDateInput.value = targetDate;
-
-  if (prefillHabitId) {
-    quickNoteHabitSelect.value = prefillHabitId;
-  } else {
-    quickNoteHabitSelect.value = '';
-  }
-
   // Check if a note already exists for this date and habit
   let targetNote = null;
   if (noteId) {
@@ -934,12 +1273,39 @@ function openQuickNoteModal(prefillDate = null, prefillHabitId = null, noteId = 
     targetNote = appData.notes?.find(n => n.date === prefillDate && (!n.habitId || n.habitId === prefillHabitId));
   }
 
+  // Populate habits select dropdown with active habits and referenced archived habit if any
+  const activeHabits = appData.habits.filter(h => !h.archived);
+  let optionsHtml = `<option value="">General Daily Note</option>`;
+  activeHabits.forEach(h => {
+    optionsHtml += `<option value="${h.id}">${escapeHtml(h.title)}</option>`;
+  });
+
+  const associatedHabitId = targetNote?.habitId || prefillHabitId;
+  if (associatedHabitId && !activeHabits.some(h => h.id === associatedHabitId)) {
+    const archivedHabit = appData.habits.find(h => h.id === associatedHabitId);
+    if (archivedHabit) {
+      optionsHtml += `<option value="${archivedHabit.id}">${escapeHtml(archivedHabit.title)} (Archived)</option>`;
+    }
+  }
+
+  quickNoteHabitSelect.innerHTML = optionsHtml;
+
+  const targetDate = prefillDate || targetNote?.date || formatDateKey(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+  quickNoteDateInput.value = targetDate;
+
+  if (associatedHabitId) {
+    quickNoteHabitSelect.value = associatedHabitId;
+  } else {
+    quickNoteHabitSelect.value = '';
+  }
+
   if (targetNote) {
     quickNoteEditId.value = targetNote.id;
     quickNoteTextInput.value = targetNote.text;
     quickNoteDateInput.value = targetNote.date;
     if (targetNote.habitId) quickNoteHabitSelect.value = targetNote.habitId;
     quickNoteModalSubtitle.textContent = `Editing reflection for ${targetNote.date}`;
+    quickNoteModalSubtitle.title = `Editing reflection for ${targetNote.date}`;
     quickMoodSelector.querySelectorAll('.mood-btn').forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-mood') === targetNote.mood);
     });
@@ -947,7 +1313,9 @@ function openQuickNoteModal(prefillDate = null, prefillHabitId = null, noteId = 
     quickNoteEditId.value = '';
     quickNoteTextInput.value = '';
     const habit = prefillHabitId ? appData.habits.find(h => h.id === prefillHabitId) : null;
-    quickNoteModalSubtitle.textContent = habit ? `Reflection on "${habit.title}"` : 'Capture your thoughts or routine insights';
+    const subText = habit ? `Reflection on "${habit.title}"` : 'Capture your thoughts or routine insights';
+    quickNoteModalSubtitle.textContent = subText;
+    quickNoteModalSubtitle.title = subText;
     quickMoodSelector.querySelectorAll('.mood-btn').forEach((btn, idx) => {
       btn.classList.toggle('active', idx === 0);
     });
@@ -1028,7 +1396,7 @@ function renderAnalytics() {
   appData.habits.forEach(h => {
     const s = calculateStreak(h);
     totalLifetimeCompletions += s.totalCompletions;
-    if (s.currentStreak > maxStreak) {
+    if (!h.archived && s.currentStreak > maxStreak) {
       maxStreak = s.currentStreak;
       maxStreakHabit = h.title;
     }
@@ -1161,6 +1529,9 @@ function renderNotesFeed() {
           <div class="note-feed-badges">
             ${habit ? `<span class="note-habit-badge" style="background-color: ${habit.color}22; color: ${habit.color}">${habit.title}</span>` : ''}
             <span class="note-habit-badge" style="background-color: var(--bg-surface-hover);">${note.mood || '🌿 Peaceful'}</span>
+            <button class="btn-row-action edit-note-btn" data-id="${note.id}" title="Edit reflection">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </button>
             <button class="btn-row-action delete-note-btn" data-id="${note.id}" title="Delete note">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
@@ -1254,7 +1625,7 @@ function setupEventListeners() {
       if (habit) {
         showConfirmation({
           title: `Archive "${habit.title}"?`,
-          message: 'This habit will be hidden from the active monthly tracking grid. Historical check-ins remain preserved in backups and lifetime analytics.',
+          message: 'This habit will be hidden from the active monthly tracking grid. Historical check-ins remain preserved in backups and lifetime analytics.\n\nYou can unarchive it anytime from the "Archived" filter or Data Manager.',
           icon: '📦',
           confirmText: 'Archive Habit',
           confirmType: 'warn'
@@ -1262,10 +1633,38 @@ function setupEventListeners() {
           if (confirmed) {
             habit.archived = true;
             saveAppData(appData);
-            showToast(`Archived "${habit.title}"`, 'warn');
+            showToast(`Archived "${habit.title}"`, 'warn', {
+              text: 'Undo',
+              onClick: () => {
+                habit.archived = false;
+                saveAppData(appData);
+                updateView();
+              }
+            });
             updateView();
           }
         });
+      }
+      return;
+    }
+
+    // Unarchive / Restore button
+    const unarchiveBtn = e.target.closest('.unarchive-habit-btn');
+    if (unarchiveBtn) {
+      const id = unarchiveBtn.getAttribute('data-id');
+      const habit = appData.habits.find(h => h.id === id);
+      if (habit) {
+        habit.archived = false;
+        saveAppData(appData);
+        showToast(`Restored "${habit.title}" to active habits!`, 'success', {
+          text: 'Undo',
+          onClick: () => {
+            habit.archived = true;
+            saveAppData(appData);
+            updateView();
+          }
+        });
+        updateView();
       }
       return;
     }
@@ -1355,13 +1754,72 @@ function setupEventListeners() {
     dataModal.classList.add('hidden');
   }
 
+  function renderDataModalArchivedList() {
+    if (!dataArchivedList) return;
+    const archivedHabits = appData.habits.filter(h => h.archived);
+    const count = archivedHabits.length;
+
+    if (dataModalArchivedCount) dataModalArchivedCount.textContent = count;
+    if (proToolsArchivedCount) proToolsArchivedCount.textContent = count;
+
+    if (restoreAllArchivedBtn) {
+      restoreAllArchivedBtn.classList.toggle('hidden', count === 0);
+    }
+
+    if (count === 0) {
+      dataArchivedList.innerHTML = `
+        <div class="empty-state" style="padding: 28px 16px;">
+          <div class="empty-icon">📦</div>
+          <h3>No archived habits</h3>
+          <p>When you retire a habit, it will appear here so you can reactivate it anytime.</p>
+        </div>
+      `;
+      return;
+    }
+
+    dataArchivedList.innerHTML = archivedHabits.map(habit => {
+      const streak = calculateStreak(habit);
+      return `
+        <div class="archived-habit-card" data-id="${habit.id}">
+          <div class="archived-habit-card-left">
+            <span class="habit-color-indicator" style="background-color: ${habit.color}"></span>
+            <div class="archived-habit-card-info">
+              <span class="archived-habit-card-title">${escapeHtml(habit.title)}</span>
+              <div class="archived-habit-card-meta">
+                <span>${habit.category}</span>
+                <span>•</span>
+                <span>Goal: ${habit.goalDays || 25}d</span>
+                <span>•</span>
+                <span>${streak.totalCompletions} total check-ins</span>
+              </div>
+            </div>
+          </div>
+          <div class="archived-habit-card-actions">
+            <button type="button" class="btn-primary-action btn-sm data-unarchive-btn" data-id="${habit.id}" title="Restore to active tracker">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Restore
+            </button>
+            <button type="button" class="btn-danger-ghost btn-sm data-delete-btn" data-id="${habit.id}" title="Permanently delete habit">
+              Delete
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   function switchDataTab(tabName) {
     dataModal.querySelectorAll('.data-tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
     });
     document.getElementById('dataTabExport').classList.toggle('active', tabName === 'export');
     document.getElementById('dataTabImport').classList.toggle('active', tabName === 'import');
+    if (dataTabArchived) dataTabArchived.classList.toggle('active', tabName === 'archived');
     document.getElementById('dataTabReset').classList.toggle('active', tabName === 'reset');
+
+    if (tabName === 'archived') {
+      renderDataModalArchivedList();
+    }
   }
 
   openDataModalBtn.addEventListener('click', () => openDataModal('export'));
@@ -1527,6 +1985,89 @@ function setupEventListeners() {
   dangerResetDemoBtn.addEventListener('click', handleResetToDemo);
   dangerWipeAllBtn.addEventListener('click', handleWipeAllData);
 
+  // Data Modal Archived tab list actions
+  if (dataArchivedList) {
+    dataArchivedList.addEventListener('click', (e) => {
+      // Restore habit
+      const unarchiveBtn = e.target.closest('.data-unarchive-btn');
+      if (unarchiveBtn) {
+        const id = unarchiveBtn.getAttribute('data-id');
+        const habit = appData.habits.find(h => h.id === id);
+        if (habit) {
+          habit.archived = false;
+          saveAppData(appData);
+          showToast(`Restored "${habit.title}" to active habits!`, 'success', {
+            text: 'Undo',
+            onClick: () => {
+              habit.archived = true;
+              saveAppData(appData);
+              updateView();
+            }
+          });
+          updateView();
+        }
+        return;
+      }
+
+      // Delete habit permanently
+      const deleteBtn = e.target.closest('.data-delete-btn');
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-id');
+        const habit = appData.habits.find(h => h.id === id);
+        if (habit) {
+          showConfirmation({
+            title: `Delete "${habit.title}" permanently?`,
+            message: 'This will permanently delete this habit and all its past check-in records across all months.\n\nThis cannot be undone.',
+            icon: '🗑️',
+            confirmText: 'Delete Habit',
+            confirmType: 'danger'
+          }).then(confirmed => {
+            if (confirmed) {
+              appData.habits = appData.habits.filter(h => h.id !== id);
+              saveAppData(appData);
+              showToast(`Deleted habit "${habit.title}"`, 'warn');
+              updateView();
+            }
+          });
+        }
+        return;
+      }
+    });
+  }
+
+  // Restore All Archived Habits
+  if (restoreAllArchivedBtn) {
+    restoreAllArchivedBtn.addEventListener('click', async () => {
+      const archived = appData.habits.filter(h => h.archived);
+      if (archived.length === 0) return;
+
+      const confirmed = await showConfirmation({
+        title: `Restore All Archived Habits (${archived.length})?`,
+        message: 'All archived habits will be restored to your active monthly tracking board.',
+        icon: '📦',
+        confirmText: 'Restore All',
+        confirmType: 'warn'
+      });
+      if (!confirmed) return;
+
+      archived.forEach(h => h.archived = false);
+      saveAppData(appData);
+      showToast(`Restored ${archived.length} habits to active tracker!`, 'success');
+      updateView();
+    });
+  }
+
+  // Pro Tools Archived Vault shortcut
+  if (proToolsArchivedBtn) {
+    proToolsArchivedBtn.addEventListener('click', () => {
+      proToolsDropdown.classList.add('hidden');
+      setView('grid');
+      settings.activeCategory = 'archived';
+      saveSettings(settings);
+      updateView();
+    });
+  }
+
   printViewBtn.addEventListener('click', () => {
     proToolsDropdown.classList.add('hidden');
     window.print();
@@ -1547,6 +2088,42 @@ function setupEventListeners() {
   closeHabitModalBtn.addEventListener('click', closeHabitModal);
   cancelHabitModalBtn.addEventListener('click', closeHabitModal);
   habitForm.addEventListener('submit', handleHabitFormSubmit);
+
+  if (archiveHabitModalBtn) {
+    archiveHabitModalBtn.addEventListener('click', () => {
+      const id = editHabitId.value;
+      const habit = appData.habits.find(h => h.id === id);
+      if (!habit) return;
+
+      if (habit.archived) {
+        habit.archived = false;
+        saveAppData(appData);
+        closeHabitModal();
+        showToast(`Restored "${habit.title}" to active habits!`, 'success', {
+          text: 'Undo',
+          onClick: () => {
+            habit.archived = true;
+            saveAppData(appData);
+            updateView();
+          }
+        });
+        updateView();
+      } else {
+        habit.archived = true;
+        saveAppData(appData);
+        closeHabitModal();
+        showToast(`Archived "${habit.title}".`, 'warn', {
+          text: 'Undo',
+          onClick: () => {
+            habit.archived = false;
+            saveAppData(appData);
+            updateView();
+          }
+        });
+        updateView();
+      }
+    });
+  }
 
   deleteHabitModalBtn.addEventListener('click', async () => {
     const id = editHabitId.value;
@@ -1642,6 +2219,18 @@ function setupEventListeners() {
   journalSearchInput.addEventListener('input', renderNotesFeed);
 
   notesFeedList.addEventListener('click', async (e) => {
+    // Edit note
+    const editBtn = e.target.closest('.edit-note-btn');
+    if (editBtn) {
+      const noteId = editBtn.getAttribute('data-id');
+      const note = (appData.notes || []).find(n => n.id === noteId);
+      if (note) {
+        openQuickNoteModal(note.date, note.habitId, note.id);
+      }
+      return;
+    }
+
+    // Delete note
     const delBtn = e.target.closest('.delete-note-btn');
     if (!delBtn) return;
     const noteId = delBtn.getAttribute('data-id');
@@ -1655,9 +2244,20 @@ function setupEventListeners() {
     });
     if (!confirmed) return;
 
+    const noteIndex = (appData.notes || []).findIndex(n => n.id === noteId);
+    const deletedNote = appData.notes[noteIndex];
     appData.notes = (appData.notes || []).filter(n => n.id !== noteId);
     saveAppData(appData);
-    showToast('Reflection note deleted.', 'warn');
+    showToast('Reflection note deleted.', 'warn', {
+      text: 'Undo',
+      onClick: () => {
+        if (!appData.notes) appData.notes = [];
+        appData.notes.splice(noteIndex, 0, deletedNote);
+        saveAppData(appData);
+        renderNotesFeed();
+        renderHabitGrid();
+      }
+    });
     renderNotesFeed();
     renderHabitGrid();
   });
@@ -1692,6 +2292,42 @@ function setupEventListeners() {
     });
   }
 
+  // Category Manager Listeners
+  if (openCategoryModalBtn) openCategoryModalBtn.addEventListener('click', openCategoryModal);
+  if (habitModalManageCatBtn) habitModalManageCatBtn.addEventListener('click', openCategoryModal);
+  if (proToolsCategoriesBtn) proToolsCategoriesBtn.addEventListener('click', openCategoryModal);
+  if (closeCategoryModalBtn) closeCategoryModalBtn.addEventListener('click', closeCategoryModal);
+  if (closeCategoryModalFooterBtn) closeCategoryModalFooterBtn.addEventListener('click', closeCategoryModal);
+  if (cancelCategoryEditBtn) cancelCategoryEditBtn.addEventListener('click', cancelCategoryEdit);
+  if (categoryForm) categoryForm.addEventListener('submit', handleCategoryFormSubmit);
+
+  if (categoryColorSwatches) {
+    categoryColorSwatches.addEventListener('click', (e) => {
+      const btn = e.target.closest('.category-swatch-btn');
+      if (!btn) return;
+      const color = btn.getAttribute('data-color');
+      if (categorySelectedColor) categorySelectedColor.value = color;
+      categoryColorSwatches.querySelectorAll('.category-swatch-btn').forEach(b => {
+        b.classList.toggle('selected', b.getAttribute('data-color') === color);
+      });
+    });
+  }
+
+  if (categoriesManageList) {
+    categoriesManageList.addEventListener('click', (e) => {
+      const editBtn = e.target.closest('.edit-category-btn');
+      if (editBtn) {
+        setCategoryEditMode(editBtn.getAttribute('data-id'));
+        return;
+      }
+      const delBtn = e.target.closest('.delete-category-btn');
+      if (delBtn) {
+        handleDeleteCategory(delBtn.getAttribute('data-id'));
+        return;
+      }
+    });
+  }
+
   // Keyboard Shortcuts
   document.addEventListener('keydown', (e) => {
     // If typing in input, don't trigger global shortcuts
@@ -1701,6 +2337,7 @@ function setupEventListeners() {
         closeCellDetailModal();
         closeQuickNoteModal();
         closeDataModal();
+        closeCategoryModal();
         shortcutsModal.classList.add('hidden');
         if (confirmModal) confirmModal.classList.add('hidden');
       }
@@ -1737,6 +2374,7 @@ function setupEventListeners() {
       closeCellDetailModal();
       closeQuickNoteModal();
       closeDataModal();
+      closeCategoryModal();
       shortcutsModal.classList.add('hidden');
       proToolsDropdown.classList.add('hidden');
       if (confirmModal) confirmModal.classList.add('hidden');

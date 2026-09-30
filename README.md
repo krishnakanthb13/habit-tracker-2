@@ -53,7 +53,11 @@ npx vercel
 
 ### 🔓 All Paywall Features Unlocked
 1. **Unlimited Habits**: No 3-habit paywall cap. Track unlimited habits across all areas of your life.
-2. **Custom Categories & Filtering**: Color-coded categories (`Health & Body`, `Focus & Work`, `Mind & Peace`, `Fitness`, `Knowledge`, `Creative`) with instant chip filtering.
+2. **Custom Category Management (Add & Edit Life Areas)**:
+   - **Personalized Taxonomy**: Create unlimited custom categories (e.g. `Career`, `Parenting`, `Mindfulness`, `Finance`) with custom names and accent color swatches.
+   - **Edit Existing Categories**: Rename existing categories and re-color them with instant reactive updates across filter chips, habit row badges, and creation forms.
+   - **Safe Deletion Guards**: Deleting a category automatically moves affected habits to an active fallback category so no routine data is ever lost.
+   - **Instant Access**: Open the Category Manager from the sub-header filter bar (`Categories`), the Habit modal (`+ Manage`), or the Pro Tools dropdown.
 3. **Flexible Goal Types & Frequencies**:
    - **Standard Daily Checkbox**: Classic yes/no tick.
    - **Specific Days of the Week**: Target specific routines (e.g., Mon, Wed, Fri only).
@@ -68,25 +72,31 @@ npx vercel
 6. **Integrated Daily Journal & Quick Reflections**:
    - **Frictionless Grid Reflections**: Add or edit daily thoughts directly from the Habit Grid by **Right-clicking any cell**, clicking the header **Daily Note** icon, tapping the habit row `📝` action, clicking the glowing blue cell note dot (`.has-note-dot`), or pressing <kbd>J</kbd>.
    - Attach reflections and mood tags (`⚡ Energized`, `🎯 Focused`, `🌿 Peaceful`, `🌧️ Struggling`, `🚀 Victorious`) to any date or habit.
-   - Searchable reflection history with blue indicator dots directly on grid cells.
-7. **Complete Data Management & Freedom (100% Offline & Local)**:
-   - **Centralized Data Manager**: Comprehensive modal for import, export, and guarded resets.
+   - Long habit titles wrap gracefully without horizontal scrollbars, preserving pristine layout on any screen size.
+   - Searchable reflection history with blue indicator dots directly on grid cells, plus one-click reflection card editing.
+7. **Habit Archiving & Un-Archiving Vault (📦)**:
+   - **Non-Destructive Pausing**: Retire or pause habits without permanently deleting your history, lifetime streaks, or reflections.
+   - **Instant Un-Archiving Everywhere**: Restore archived habits back to your active grid from:
+     - The **`📦 Archived (N)`** category chip on the filter bar.
+     - The habit row restore button (`📤`) in archived view.
+     - The **Habit Edit Modal** toggle ("Restore to Active").
+     - The **Data Manager Modal** dedicated Archived Habits tab with batch restore ("Restore All to Active").
+   - **Instant Undo Action**: Archiving or restoring a habit provides an interactive toast with a 1-click **Undo** button.
+8. **Upgraded Data Management & Vault (Vertical Tabs & 900px Wide Layout)**:
+   - **Modern Sidebar Navigation**: Redesigned 900px modal dialog featuring vertical tabs on the left for seamless workflow switching:
+     - 📤 **Export Data**: Full JSON backup with *Recommended* badge, Current Month CSV, and Lifetime CSV.
+     - 📥 **Import Data**: Drag-and-drop file upload, JSON code editor, and clean *Replace All* vs *Merge* strategy toggles.
+     - 📦 **Archived Vault**: Dedicated tab with count badge, habit cards, and individual/batch restore.
+     - ⚠️ **Reset Data**: Protected Danger Zone to reset to starter demo routines or wipe data to a blank canvas.
+   - **100% Offline & Local**: Your routine data never leaves your browser origin.
    - **Quick Pro Tools Menu**: 1-click downloads for Month CSV, Lifetime CSV, and JSON Backups without opening full modals.
-   - **Full JSON Backup & Restore**: Export all habits, streak history, notes, and preferences into a single file. Drag & drop or paste JSON to restore anytime.
-   - **Import Strategies**: Choose between **Clean Overwrite (Replace All)** or **Merge with Current Routines**.
-   - **Spreadsheet Exports**:
-     - **Export Month (CSV)**: Formatted table of the current active month.
-     - **Export Lifetime (CSV)**: Complete chronological matrix of every recorded check-in across all months/years.
-   - **Guarded Reset Options (Data Manager Danger Zone)**:
-     - **Wipe All Data (Blank Slate)**: Permanently erases all habits, check-ins, and notes to start completely from scratch (0 habits), protected by double confirmation modals.
-     - **Reset to Demo Starter Routines**: Re-populates fresh starter routines (Meditation, Reading, Hydration, etc.).
-8. **5 Cycling Color Themes & Tactile Audio**:
+9. **5 Cycling Color Themes & Tactile Audio**:
    - One-click cycling between 5 curated themes: **Midnight OLED Dark 🌙**, **Crisp Paper Light ☀️**, **Forest Sage 🌲**, **Nordic Ocean 🌊**, and **Sunset Ember 🌅**.
    - Synthesized pop sounds and celebration chords on milestone completions via the native Web Audio API.
-   - Confetti burst animation upon completing monthly goals.
-9. **Dedicated "How to Use" User Manual & Guide**:
-   - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze and numeric logging, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
-10. **In-App Confirmation Dialogs**:
+   - Resilient celebration confetti burst upon completing monthly goals that works out-of-the-box across both bundled and standalone static environments.
+10. **Dedicated "How to Use" User Manual & Guide**:
+    - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze, numeric logging, habit archive/restore vault, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
+11. **In-App Confirmation Dialogs & Non-Destructive Guards**:
     - Custom non-blocking modal dialogs protect against accidental data wiping, habit deletion, or reflection loss with clear warning previews and <kbd>Esc</kbd> dismissal.
 
 ---

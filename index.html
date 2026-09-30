@@ -8,8 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./src/style.css">
+  <link rel="stylesheet" href="./src/style.css?v=0.0.8">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path d='m9 12 2 2 4-4' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <!-- Canvas Confetti Library (Supports both standalone browser and bundled environments) -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <div id="app" class="app-container">
@@ -105,6 +107,15 @@
             </button>
             <div id="proToolsDropdown" class="dropdown-menu hidden">
               <div class="dropdown-header">Quick Tools & Export</div>
+              <button class="dropdown-item" id="proToolsArchivedBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                Archived Habits (<span id="proToolsArchivedCount">0</span>)
+              </button>
+              <button class="dropdown-item" id="proToolsCategoriesBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                Manage Categories
+              </button>
+              <div class="dropdown-divider"></div>
               <button class="dropdown-item" id="exportCsvBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                 Export Month to CSV
@@ -138,8 +149,14 @@
 
     <!-- Sub-header Category & Quick Filter Toolbar -->
     <div class="sub-header-bar">
-      <div class="categories-scroller" id="categoryChips">
-        <!-- Rendered dynamically -->
+      <div class="categories-toolbar">
+        <div class="categories-scroller" id="categoryChips">
+          <!-- Rendered dynamically -->
+        </div>
+        <button id="openCategoryModalBtn" class="btn-manage-categories" title="Add, edit, or customize categories" aria-label="Manage Categories">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Categories</span>
+        </button>
       </div>
       <div class="header-stats-summary" id="headerStatsSummary">
         <!-- Dynamic: e.g. "6 Habits • 78% Achieved" -->
@@ -432,6 +449,15 @@
               </div>
 
               <div class="guide-feature-card">
+                <div class="feature-card-icon">📦</div>
+                <div class="feature-card-body">
+                  <h4>Archive & Restore Vault</h4>
+                  <p>Retire habits without losing history. Archived habits are safely hidden from your active monthly grid, while all past check-ins are preserved. View archived routines via the <strong>Archived</strong> category filter or <strong>Data Manager</strong> to unarchive and restore them anytime.</p>
+                  <span class="feature-pill-tag">Two-Way Archival</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
                 <div class="feature-card-icon">🎨</div>
                 <div class="feature-card-body">
                   <h4>Theme Cycling</h4>
@@ -547,7 +573,10 @@
 
           <div class="form-row-two">
             <div class="form-group">
-              <label for="habitCategorySelect">Category</label>
+              <div class="form-label-with-action">
+                <label for="habitCategorySelect">Category</label>
+                <button type="button" id="habitModalManageCatBtn" class="link-action-btn">+ Manage</button>
+              </div>
               <select id="habitCategorySelect" class="form-select">
                 <!-- Dynamically populated -->
               </select>
@@ -628,7 +657,10 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" id="deleteHabitModalBtn" class="btn-danger-ghost hidden">Delete Habit</button>
+            <div class="footer-actions-left">
+              <button type="button" id="deleteHabitModalBtn" class="btn-danger-ghost hidden">Delete Habit</button>
+              <button type="button" id="archiveHabitModalBtn" class="btn-secondary-ghost hidden">Archive Habit</button>
+            </div>
             <div class="footer-actions-right">
               <button type="button" id="cancelHabitModalBtn" class="btn-secondary-ghost">Cancel</button>
               <button type="submit" class="btn-primary-action">Save Habit</button>
@@ -749,125 +781,266 @@
 
     <!-- MODAL: DATA MANAGEMENT (EXPORT, IMPORT, RESET) -->
     <div id="dataModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dataModalTitle">
-      <div class="modal-dialog modal-dialog-md">
+      <div class="modal-dialog modal-dialog-xl data-management-dialog">
+        <!-- Integrated Header -->
+        <div class="modal-header data-modal-header">
+          <div class="data-modal-header-info">
+            <div class="data-modal-title-row">
+              <span class="data-modal-pill">DATA VAULT</span>
+              <h2 id="dataModalTitle" class="modal-heading">Data Management</h2>
+            </div>
+            <p class="modal-subheading">100% private, on-device local storage. Backups, spreadsheet exports, restored routines, and reset tools.</p>
+          </div>
+          <button id="closeDataModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+
+        <!-- Vertical Tabs Layout Body -->
+        <div class="data-modal-body">
+          <!-- Left: Vertical Navigation Tabs -->
+          <nav class="data-vertical-tabs" aria-label="Data management options">
+            <button type="button" class="data-tab-btn active" data-tab="export">
+              <span class="tab-icon-wrap">📤</span>
+              <div class="tab-text-wrap">
+                <span class="tab-label">Export Data</span>
+                <span class="tab-sublabel">JSON backup & CSV tables</span>
+              </div>
+            </button>
+
+            <button type="button" class="data-tab-btn" data-tab="import">
+              <span class="tab-icon-wrap">📥</span>
+              <div class="tab-text-wrap">
+                <span class="tab-label">Import Data</span>
+                <span class="tab-sublabel">Restore or merge backup</span>
+              </div>
+            </button>
+
+            <button type="button" class="data-tab-btn" data-tab="archived">
+              <span class="tab-icon-wrap">📦</span>
+              <div class="tab-text-wrap">
+                <span class="tab-label">Archived Vault</span>
+                <span class="tab-sublabel">Hidden & paused routines</span>
+              </div>
+              <span class="data-tab-count-pill" id="dataModalArchivedCount">0</span>
+            </button>
+
+            <button type="button" class="data-tab-btn danger" data-tab="reset">
+              <span class="tab-icon-wrap">⚠️</span>
+              <div class="tab-text-wrap">
+                <span class="tab-label">Reset Data</span>
+                <span class="tab-sublabel">Starter demo & clear</span>
+              </div>
+            </button>
+
+            <div class="data-sidebar-footer">
+              <div class="privacy-badge">
+                <span class="privacy-icon">🔒</span>
+                <div class="privacy-text">
+                  <strong>Local & Private</strong>
+                  <span>Habits stay inside this browser</span>
+                </div>
+              </div>
+            </div>
+          </nav>
+
+          <!-- Right: Content Panels Area -->
+          <div class="data-tab-panels">
+            <!-- 1. Export Tab Content -->
+            <div id="dataTabExport" class="data-tab-content active">
+              <div class="tab-section-header">
+                <div class="tab-section-icon export-icon">📤</div>
+                <div>
+                  <h3 class="tab-section-title">Export Habit Records</h3>
+                  <p class="tab-section-desc">Download complete backups or spreadsheets formatted for Excel, Numbers, and Google Sheets.</p>
+                </div>
+              </div>
+
+              <div class="data-card-grid">
+                <div class="data-action-card">
+                  <div class="data-card-icon-wrap json-bg">💾</div>
+                  <div class="data-card-info">
+                    <div class="card-title-row">
+                      <h4>Full JSON Backup</h4>
+                      <span class="badge-recommended">Recommended</span>
+                    </div>
+                    <p>Export all habits, completion history, daily reflections, custom frequencies, and settings into one transferable file.</p>
+                  </div>
+                  <button type="button" id="dataExportJsonBtn" class="btn-primary-action btn-sm">Download Backup (JSON)</button>
+                </div>
+
+                <div class="data-action-card">
+                  <div class="data-card-icon-wrap csv-bg">📊</div>
+                  <div class="data-card-info">
+                    <h4>Current Month (CSV)</h4>
+                    <p>Export the current month's table format ready for spreadsheet software with dates, streak metrics, and rates.</p>
+                  </div>
+                  <button type="button" id="dataExportMonthCsvBtn" class="btn-secondary-ghost btn-sm">Export Month CSV</button>
+                </div>
+
+                <div class="data-action-card">
+                  <div class="data-card-icon-wrap alltime-bg">📈</div>
+                  <div class="data-card-info">
+                    <h4>All-Time History (CSV)</h4>
+                    <p>Export your chronological check-in history across all months and years with active/archived routine status.</p>
+                  </div>
+                  <button type="button" id="dataExportAllCsvBtn" class="btn-secondary-ghost btn-sm">Export Lifetime CSV</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Import Tab Content -->
+            <div id="dataTabImport" class="data-tab-content">
+              <div class="tab-section-header">
+                <div class="tab-section-icon import-icon">📥</div>
+                <div>
+                  <h3 class="tab-section-title">Restore or Import Data</h3>
+                  <p class="tab-section-desc">Restore previously saved backups or migrate habits from another device easily.</p>
+                </div>
+              </div>
+
+              <div class="import-drop-zone" id="importDropZone">
+                <div class="drop-zone-icon">📁</div>
+                <h4>Drag & Drop your backup JSON file here</h4>
+                <p>or <button type="button" id="browseJsonBtn" class="link-btn">browse file from device</button></p>
+                <span id="importFileStatus" class="import-file-status hidden"></span>
+              </div>
+
+              <div class="or-divider"><span>OR PASTE BACKUP JSON CODE</span></div>
+
+              <textarea id="importJsonTextarea" class="form-textarea json-textarea" rows="4" placeholder='Paste your backup JSON code here (e.g. { "habits": [...], "settings": {...} })...'></textarea>
+
+              <div class="form-group" style="margin-top: 14px;">
+                <label>Import Strategy</label>
+                <div class="goal-type-selector">
+                  <label class="goal-radio-card">
+                    <input type="radio" name="importModeChoice" value="replace" checked>
+                    <div class="goal-radio-content">
+                      <span class="radio-title">Replace All Current Data</span>
+                      <span class="radio-desc">Cleanly replaces all habits with the imported backup</span>
+                    </div>
+                  </label>
+                  <label class="goal-radio-card">
+                    <input type="radio" name="importModeChoice" value="merge">
+                    <div class="goal-radio-content">
+                      <span class="radio-title">Merge with Current Habits</span>
+                      <span class="radio-desc">Combines incoming routines with your current active routines</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="modal-footer" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+                <button type="button" id="executeImportBtn" class="btn-primary-action w-full">Apply & Restore Import</button>
+              </div>
+            </div>
+
+            <!-- 3. Archived Habits Tab Content -->
+            <div id="dataTabArchived" class="data-tab-content">
+              <div class="archived-tab-header">
+                <div>
+                  <h4 class="archived-tab-title">Archived Habits Vault</h4>
+                  <p class="archived-tab-desc">Paused routines that are hidden from the monthly tracking grid. Historical check-ins remain preserved.</p>
+                </div>
+                <button type="button" id="restoreAllArchivedBtn" class="btn-secondary-ghost btn-sm text-success hidden">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Restore All to Active
+                </button>
+              </div>
+              <div id="dataArchivedList" class="archived-habits-list">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <!-- 4. Reset Tab Content (Danger Zone) -->
+            <div id="dataTabReset" class="data-tab-content">
+              <div class="danger-box">
+                <div class="danger-header">
+                  <span class="danger-icon">⚠️</span>
+                  <div>
+                    <h4>Danger Zone: Reset Actions</h4>
+                    <p>These actions modify or erase your local tracking data. Export a backup first if needed.</p>
+                  </div>
+                </div>
+
+                <div class="danger-options-list">
+                  <!-- Reset to Demo -->
+                  <div class="danger-option-item">
+                    <div class="danger-option-text">
+                      <h5>Reset to Demo Starter Routines</h5>
+                      <p>Replaces current data with realistic starter habits (Sunlight walk, Deep work, Reading, Water, Gym, Meditation).</p>
+                    </div>
+                    <button type="button" id="dangerResetDemoBtn" class="btn-secondary-ghost text-gold">Reset to Demo</button>
+                  </div>
+
+                  <!-- Wipe Entirely -->
+                  <div class="danger-option-item">
+                    <div class="danger-option-text">
+                      <h5 class="text-danger">Wipe / Clear Whole Data (Blank Canvas)</h5>
+                      <p>Permanently deletes all habits, completion history, and reflections. Starts completely fresh with 0 habits.</p>
+                    </div>
+                    <button type="button" id="dangerWipeAllBtn" class="btn-danger-ghost">Wipe All Data</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CATEGORY MANAGER (ADD & EDIT CATEGORIES) -->
+    <div id="categoryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle">
+      <div class="modal-dialog modal-dialog-md category-manager-dialog">
         <div class="modal-header">
           <div>
-            <h2 id="dataModalTitle" class="modal-heading">Data Management</h2>
-            <p class="modal-subheading">100% private & local. Export, import, or reset your habits anytime.</p>
+            <h2 id="categoryModalTitle" class="modal-heading">Manage Categories</h2>
+            <p class="modal-subheading">Organize your habits into custom life areas and color-coded routines.</p>
           </div>
-          <button id="closeDataModalBtn" class="modal-close-btn">&times;</button>
+          <button id="closeCategoryModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
         </div>
 
-        <!-- Tabs inside Data Modal -->
-        <div class="data-tabs-bar">
-          <button type="button" class="data-tab-btn active" data-tab="export">📤 Export Data</button>
-          <button type="button" class="data-tab-btn" data-tab="import">📥 Import Data</button>
-          <button type="button" class="data-tab-btn danger" data-tab="reset">⚠️ Reset Data</button>
-        </div>
-
-        <!-- 1. Export Tab Content -->
-        <div id="dataTabExport" class="data-tab-content active">
-          <div class="data-card-grid">
-            <div class="data-action-card">
-              <div class="data-card-icon">💾</div>
-              <div class="data-card-info">
-                <h4>Full JSON Backup</h4>
-                <p>Export all habits, completion history, daily reflections, and settings into one JSON file.</p>
-              </div>
-              <button type="button" id="dataExportJsonBtn" class="btn-primary-action btn-sm">Download Backup (JSON)</button>
-            </div>
-
-            <div class="data-action-card">
-              <div class="data-card-icon">📊</div>
-              <div class="data-card-info">
-                <h4>Current Month (CSV)</h4>
-                <p>Export the current month's table format ready for Excel, Numbers, or Google Sheets.</p>
-              </div>
-              <button type="button" id="dataExportMonthCsvBtn" class="btn-secondary-ghost btn-sm">Export Month CSV</button>
-            </div>
-
-            <div class="data-action-card">
-              <div class="data-card-icon">📈</div>
-              <div class="data-card-info">
-                <h4>All-Time History (CSV)</h4>
-                <p>Export your full chronological check-in history across all months and years.</p>
-              </div>
-              <button type="button" id="dataExportAllCsvBtn" class="btn-secondary-ghost btn-sm">Export Lifetime CSV</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Import Tab Content -->
-        <div id="dataTabImport" class="data-tab-content">
-          <div class="import-drop-zone" id="importDropZone">
-            <div class="drop-zone-icon">📁</div>
-            <h4>Drag & Drop your backup JSON file here</h4>
-            <p>or <button type="button" id="browseJsonBtn" class="link-btn">browse file from device</button></p>
-            <span id="importFileStatus" class="import-file-status hidden"></span>
+        <!-- Add / Edit Category Form -->
+        <form id="categoryForm" class="category-edit-form">
+          <input type="hidden" id="categoryEditId" value="">
+          <div class="category-form-header">
+            <span id="categoryFormModeTitle" class="category-form-title">+ Add New Category</span>
+            <button type="button" id="cancelCategoryEditBtn" class="btn-secondary-ghost btn-xs hidden">Cancel Edit</button>
           </div>
 
-          <div class="or-divider"><span>OR PASTE BACKUP JSON CODE</span></div>
+          <div class="category-form-fields">
+            <div class="form-group flex-1">
+              <label for="categoryNameInput">Category Name <span class="required-star">*</span></label>
+              <input type="text" id="categoryNameInput" class="form-input" placeholder="e.g. Finance, Career, Spiritual" maxlength="30" required>
+            </div>
 
-          <textarea id="importJsonTextarea" class="form-textarea" rows="4" placeholder='Paste your backup JSON content here...'></textarea>
-
-          <div class="form-group" style="margin-top: 14px;">
-            <label>Import Method</label>
-            <div class="goal-type-selector">
-              <label class="goal-radio-card">
-                <input type="radio" name="importModeChoice" value="replace" checked>
-                <div class="goal-radio-content">
-                  <span class="radio-title">Replace All Current Data</span>
-                  <span class="radio-desc">Cleanly overwrites all current habits with the imported backup</span>
-                </div>
-              </label>
-              <label class="goal-radio-card">
-                <input type="radio" name="importModeChoice" value="merge">
-                <div class="goal-radio-content">
-                  <span class="radio-title">Merge with Current Habits</span>
-                  <span class="radio-desc">Combines incoming habits with your existing active routines</span>
-                </div>
-              </label>
+            <div class="form-group">
+              <label>Color Swatch</label>
+              <div class="category-swatches-row" id="categoryColorSwatches">
+                <!-- Color swatches rendered via JS -->
+              </div>
+              <input type="hidden" id="categorySelectedColor" value="#10b981">
             </div>
           </div>
 
-          <div class="modal-footer" style="margin-top: 16px;">
-            <button type="button" id="executeImportBtn" class="btn-primary-action w-full">Apply & Restore Import</button>
+          <div class="category-form-actions">
+            <button type="submit" id="saveCategoryBtn" class="btn-primary-action btn-sm">+ Add Category</button>
+          </div>
+        </form>
+
+        <!-- Existing Categories List -->
+        <div class="category-list-section">
+          <div class="category-list-header">
+            <h4>Existing Categories (<span id="categoryTotalCount">0</span>)</h4>
+            <span class="category-list-hint">Click ✏️ to edit name or color</span>
+          </div>
+
+          <div class="categories-manage-list" id="categoriesManageList">
+            <!-- Dynamic Category Cards rendered via JS -->
           </div>
         </div>
 
-        <!-- 3. Reset Tab Content (Danger Zone) -->
-        <div id="dataTabReset" class="data-tab-content">
-          <div class="danger-box">
-            <div class="danger-header">
-              <span class="danger-icon">⚠️</span>
-              <div>
-                <h4>Danger Zone: Reset Actions</h4>
-                <p>These actions modify or erase your local tracking data. Export a backup first if needed.</p>
-              </div>
-            </div>
-
-            <div class="danger-options-list">
-              <!-- Reset to Demo -->
-              <div class="danger-option-item">
-                <div class="danger-option-text">
-                  <h5>Reset to Demo Starter Routines</h5>
-                  <p>Replaces current data with realistic starter habits (Sunlight walk, Deep work, Reading, Water, Gym, Meditation).</p>
-                </div>
-                <button type="button" id="dangerResetDemoBtn" class="btn-secondary-ghost text-gold">Reset to Demo</button>
-              </div>
-
-              <!-- Wipe Entirely -->
-              <div class="danger-option-item">
-                <div class="danger-option-text">
-                  <h5 class="text-danger">Wipe / Clear Whole Data (Blank Canvas)</h5>
-                  <p>Permanently deletes all habits, completion history, and reflections. Starts completely fresh with 0 habits.</p>
-                </div>
-                <button type="button" id="dangerWipeAllBtn" class="btn-danger-ghost">Wipe All Data</button>
-              </div>
-            </div>
-          </div>
+        <div class="modal-footer" style="margin-top: 16px;">
+          <button type="button" id="closeCategoryModalFooterBtn" class="btn-secondary-ghost">Done</button>
         </div>
-
       </div>
     </div>
 
@@ -897,6 +1070,6 @@
   </div>
 
   <!-- Main JavaScript bundle -->
-  <script type="module" src="./src/app.js"></script>
+  <script type="module" src="./src/app.js?v=0.0.8"></script>
 </body>
 </html>

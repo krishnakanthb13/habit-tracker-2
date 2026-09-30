@@ -3,7 +3,7 @@
 const STORAGE_KEY = 'dailyhabits_pro_data_v1';
 const SETTINGS_KEY = 'dailyhabits_settings_v1';
 
-export const CATEGORIES = [
+export const DEFAULT_CATEGORIES = [
   { id: 'health', name: 'Health & Body', color: '#10b981', icon: 'heart-pulse' },
   { id: 'focus', name: 'Focus & Work', color: '#6366f1', icon: 'zap' },
   { id: 'mind', name: 'Mind & Peace', color: '#8b5cf6', icon: 'sparkles' },
@@ -11,6 +11,8 @@ export const CATEGORIES = [
   { id: 'learning', name: 'Knowledge', color: '#0284c7', icon: 'book-open' },
   { id: 'creative', name: 'Creative', color: '#f59e0b', icon: 'palette' }
 ];
+
+export const CATEGORIES = DEFAULT_CATEGORIES;
 
 export const HABIT_COLORS = [
   '#10b981', // Emerald
@@ -192,6 +194,13 @@ export function loadAppData() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.habits)) {
+        if (!parsed.categories || !Array.isArray(parsed.categories) || parsed.categories.length === 0) {
+          if (Array.isArray(parsed.customCategories) && parsed.customCategories.length > 0) {
+            parsed.categories = [...DEFAULT_CATEGORIES, ...parsed.customCategories];
+          } else {
+            parsed.categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+          }
+        }
         return parsed;
       }
     }
@@ -203,6 +212,7 @@ export function loadAppData() {
   const initialData = {
     habits: getSeedHabits(),
     notes: SEED_NOTES,
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
     customCategories: [],
     version: 2
   };
@@ -257,6 +267,7 @@ export function clearAllData() {
   const blankData = {
     habits: [],
     notes: [],
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
     customCategories: [],
     version: 2
   };
@@ -269,6 +280,7 @@ export function resetToDemoData() {
   const demoData = {
     habits: getSeedHabits(),
     notes: SEED_NOTES,
+    categories: JSON.parse(JSON.stringify(DEFAULT_CATEGORIES)),
     customCategories: [],
     version: 2
   };
@@ -278,6 +290,8 @@ export function resetToDemoData() {
 
 // Export current monthly view to CSV
 export function exportToCSV(habits, year, month) {
+  // Only export active habits for monthly tracking CSV
+  const activeHabits = habits.filter(h => !h.archived);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const headers = ['Habit Name', 'Category', 'Goal Days', 'Achieved Days'];
   
@@ -287,7 +301,7 @@ export function exportToCSV(habits, year, month) {
 
   const rows = [headers.join(',')];
 
-  habits.forEach(habit => {
+  activeHabits.forEach(habit => {
     let achievedCount = 0;
     const dayCells = [];
 
@@ -329,7 +343,7 @@ export function exportAllTimeToCSV(habits) {
   });
 
   const sortedDates = Array.from(dateSet).sort();
-  const headers = ['Habit Name', 'Category', 'Frequency', 'Total Completions', ...sortedDates];
+  const headers = ['Habit Name', 'Status', 'Category', 'Frequency', 'Total Completions', ...sortedDates];
   const rows = [headers.join(',')];
 
   habits.forEach(habit => {
@@ -353,6 +367,7 @@ export function exportAllTimeToCSV(habits) {
 
     const row = [
       `"${habit.title.replace(/"/g, '""')}"`,
+      habit.archived ? 'Archived' : 'Active',
       `"${habit.category || 'general'}"`,
       `"${habit.frequencyType || 'daily'}"`,
       completionsCount,
@@ -398,10 +413,17 @@ export function importHabitData(currentData, incomingData, mode = 'replace') {
     completions: h.completions && typeof h.completions === 'object' ? h.completions : {}
   }));
 
+  const importedCategories = Array.isArray(incomingData.categories) && incomingData.categories.length > 0
+    ? incomingData.categories
+    : (Array.isArray(incomingData.customCategories) && incomingData.customCategories.length > 0
+      ? [...DEFAULT_CATEGORIES, ...incomingData.customCategories]
+      : (currentData.categories || JSON.parse(JSON.stringify(DEFAULT_CATEGORIES))));
+
   if (mode === 'replace') {
     const updated = {
       habits: sanitizedHabits,
       notes: importedNotes,
+      categories: importedCategories,
       customCategories: incomingData.customCategories || currentData.customCategories || [],
       version: 2
     };
@@ -422,9 +444,20 @@ export function importHabitData(currentData, incomingData, mode = 'replace') {
     });
 
     const mergedNotes = [...(currentData.notes || []), ...importedNotes];
+
+    // Merge categories by ID
+    const catMap = new Map();
+    (currentData.categories || DEFAULT_CATEGORIES).forEach(c => catMap.set(c.id, { ...c }));
+    importedCategories.forEach(c => {
+      if (!catMap.has(c.id)) {
+        catMap.set(c.id, { ...c });
+      }
+    });
+
     const updated = {
       habits: mergedHabits,
       notes: mergedNotes,
+      categories: Array.from(catMap.values()),
       customCategories: currentData.customCategories || [],
       version: 2
     };

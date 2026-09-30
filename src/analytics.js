@@ -88,12 +88,13 @@ export function calculateMonthStats(habits, year, month) {
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   const elapsedDays = isCurrentMonth ? today.getDate() : daysInMonth;
 
+  const activeHabits = habits.filter(h => !h.archived);
   let totalTargetDays = 0;
   let totalAchievedDays = 0;
-  let totalHabitsCount = habits.filter(h => !h.archived).length;
+  let totalHabitsCount = activeHabits.length;
   let completedGoalsCount = 0;
 
-  const habitStats = habits.map(habit => {
+  const habitStats = activeHabits.map(habit => {
     let achieved = 0;
     let skipped = 0;
 

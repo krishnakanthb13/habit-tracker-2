@@ -54,6 +54,23 @@ Checking off a cell tells you *what* happened; reflecting tells you *why*.
 - Habit tracking often fails when journaling is treated as a separate chore requiring users to leave their active tracking screen.
 - DailyHabits Pro embeds reflection directly into the monthly grid: **Right-click** any day cell, click the header Daily Note icon, tap any row's `📝` action, or press <kbd>J</kbd> to jot down thoughts, energy levels, or blockers in seconds without breaking context.
 
+### VI. Habit Lifecycles: Archiving Over Destruction
+Routines naturally evolve across the seasons of human life:
+- A winter running routine may pause during summer cycling; an intensive study habit concludes upon passing an examination.
+- Forcing users to permanently *delete* a paused habit creates cognitive friction and regret: it destroys historical consistency data, erases lifetime streak trophies, and discards valuable reflection notes.
+- In DailyHabits Pro, habits can be retired to the **Archived Vault**. They disappear from the active monthly grid to maintain a lean, high-focus workspace, but their check-in history remains permanently preserved and can be reactivated with a single click.
+
+### VII. Two-Way Doors & Reversible Actions (Interactive Undo)
+In product design, decisions should be treated as "two-way doors" whenever possible:
+- Rather than forcing friction-heavy confirmations on every everyday toggle or archiving action, the interface performs the action immediately with an instant, interactive **Undo** toast.
+- This maintains a fluid, arcade-speed user experience while ensuring that accidental clicks can be reversed with zero consequence.
+
+### VIII. Personalized Life Domains & Identity-Based Taxonomy
+In *Atomic Habits*, behavior change is rooted in identity ("I am a runner", "I am an author", "I am a mindful parent"):
+- Hardcoded, rigid category taxonomies force users into generic boxes (e.g. "Health", "Work") that fail to reflect their real-world personal focus areas.
+- By providing full freedom to **add, rename, re-color, and customize categories**, DailyHabits Pro empowers users to model their tracking environment after their actual aspirations (e.g., `Deep Tech`, `Mindful Fatherhood`, `Creative Writing`, `Financial Independence`).
+- Deletions are safeguarded with automated habit migration to guarantee that routine histories are never severed or corrupted.
+
 ---
 
 ## 4. Target Audience & Use Cases
@@ -72,4 +89,5 @@ Checking off a cell tells you *what* happened; reflecting tells you *why*.
 | **Vanilla HTML/CSS/JS** | No React/Vue/Angular reactivity boilerplate. | Ensures near-instant page load (<50ms), ultra-small bundle size (~25 kB), and zero framework obsolescence over a decade. |
 | **LocalStorage Persistence** | Data is scoped to the specific browser origin. | Eliminates server costs, database maintenance, and privacy liabilities. Mitigated by one-click JSON backup & restore. |
 | **Custom In-App Modals** | Extra custom component code instead of `window.confirm()`. | Native dialogs are often blocked by browsers, look jarring, and freeze background threads. Custom modals provide predictable, accessible, and beautiful confirmations. |
+| **Vertical Navigation Data Hub** | Requires 2-column modal layout and responsive CSS. | Replaces cramped horizontal tabs with a desktop-class 900px hub that gives export cards, import tools, and archived routine lists dedicated space to breathe. |
 | **Centralized Danger Zone** | Destructive actions (reset, wipe) removed from quick menus. | Confining destructive actions strictly inside the Data Manager modal behind double confirmation guards prevents catastrophic accidental data loss while keeping non-destructive exports ubiquitous. |

@@ -96,14 +96,23 @@ graph TD
 | Function | Parameters | Description |
 |---|---|---|
 | `showConfirmation(options)` | `options: Object` | Promise-based custom modal for confirmations (`title`, `message`, `icon`, `confirmText`, `confirmType`). |
-| `showToast(message, type)` | `message: String, type: String` | Displays animated toast notifications (`success`, `warn`, `error`). |
+| `showToast(message, type, duration, action)` | `message: String, type?: String, duration?: Number, action?: Object` | Displays animated toast notifications (`success`, `warn`, `error`) with optional interactive 1-click `action` ({ text, onClick }) for instant Undo. |
+| `triggerCelebrationConfetti(options)` | `options?: Object` | Resilient confetti helper supporting both browser global (`window.confetti`) and bundlers without halting execution in unbundled environments. |
 | `cycleTheme()` | none | Cycles between 5 curated themes (`dark`, `light`, `forest`, `ocean`, `sunset`). |
-| `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers and columns. |
-| `openQuickNoteModal(date, habitId, noteId)` | `date?: String, habitId?: String, noteId?: String` | Opens daily reflection dialog pre-populated for given date/habit with mood chips. |
+| `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers, archived badges, and dynamic unarchive row buttons. |
+| `openQuickNoteModal(date, habitId, noteId)` | `date?: String, habitId?: String, noteId?: String` | Opens daily reflection dialog pre-populated for given date/habit with mood chips, non-overflowing titles, and preserved archived tags. |
 | `closeQuickNoteModal()` | none | Closes reflection modal and resets text inputs. |
 | `handleQuickNoteSubmit(e)` | `e?: Event` | Persists reflection to `appData.notes`, refreshes grid indicators, and displays toast. |
-| `renderAnalytics()` | none | Populates KPI cards, 365-day activity matrix, day-of-week bars, and leaderboard. |
-| `renderJournal()` | none | Displays daily reflection feed with mood badges and search filter. |
+| `openDataModal(tab)` | `tab?: String` | Opens the 900px wide Data Management modal with vertical tabs (`export`, `import`, `archived`, `reset`). |
+| `switchDataTab(tabName)` | `tabName: String` | Toggles active tab panels and sidebar buttons, rendering the archived routines vault on demand. |
+| `renderDataModalArchivedList()` | none | Renders the list of paused routines in the Data Vault with habit swatches, individual restore buttons, and batch restore. |
+| `renderAnalytics()` | none | Populates KPI cards, 365-day activity matrix, day-of-week bars, and leaderboard (filtered strictly to active habits). |
+| `renderJournal()` | none | Displays daily reflection feed with mood badges, 1-click edit buttons, and search filter. |
+| `openCategoryModal()` | none | Opens the Category Manager dialog, populates swatches, and renders existing categories. |
+| `closeCategoryModal()` | none | Closes Category Manager dialog and resets edit state. |
+| `setCategoryEditMode(catId)` | `catId: String` | Loads targeted category into edit form for real-time renaming and color updating. |
+| `handleCategoryFormSubmit(e)` | `e: Event` | Validates and persists new or edited category to `appData.categories` with reactive updates across the grid. |
+| `handleDeleteCategory(catId)` | `catId: String` | Safely deletes a category, prompting confirmation and automatically migrating affected habits to a fallback category. |
 
 ---
 
