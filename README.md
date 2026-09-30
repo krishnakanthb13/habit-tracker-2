@@ -126,6 +126,34 @@ npx vercel
 
 ---
 
+## 🔮 Future Roadmap & Ideas
+
+The following concepts have been proposed to extend DailyHabits Pro while preserving its ultra-lightweight, zero-bloat vanilla architecture:
+
+### 📊 1. Advanced Analytics & Quantitative Insights
+- **Rolling Momentum Velocity**: A rolling 7-day vs. 30-day velocity metric (e.g., `📈 +12% momentum this week`) that prioritizes recent recovery over historical slumps.
+- **Streak Freeze Recovery Ratio**: Dedicated metric calculating how many freeze shields (🛡️) were redeemed and successfully recovered from without abandoning routine momentum.
+- **Seasonal Consistency Trends**: Comparative monthly charts (e.g., comparing Q1 vs. Q2 completion rates) to surface seasonal behavioral shifts.
+
+### 🍞 2. Feedback & Tactical Notifications
+- **Category Filter Switch Indicators**: Subtle count toasts when toggling category chips (e.g., *"Showing 4 routines in Health & Body"*).
+- **Clipboard Action Signals**: Visual confirmation whenever JSON backups, raw tables, or reflection entries are copied to the system clipboard.
+- **Milestone Streak Celebrations**: Micro-chime notifications upon crossing 7, 21, 66, and 100-day consecutive tracking streaks.
+
+### 🎨 3. Aesthetics & Theme Customization
+- **Custom Accent Color Studio**: Allow users to pick their own primary accent tone (Emerald, Electric Violet, Cyberpunk Cyan, Vivid Rose, Amber Gold) independently of background palettes.
+- **System / Time-of-Day Automatic Sync**: Optional auto-toggle matching system `prefers-color-scheme` or transitioning from Paper Light at sunrise to Midnight OLED at sunset.
+- **Distraction-Free E-Ink Monochrome**: Ultra-high contrast pure grayscale palette with 0% saturation designed for E-Ink displays and minimal visual stimulation.
+- **Frosted Glass Toggle**: Optional `backdrop-filter: blur(12px)` acrylic glassmorphism styling for users on modern hardware.
+
+### 📝 4. Journaling, Reflections & Note Integration
+- **Markdown & Interactive Checklists**: Inline rendering of bold text, bullet points, and sub-task checklists within daily reflection cards.
+- **Mood vs. Habit Correlation Matrix**: Automatic insight cards analyzing how habit completion impacts logged emotional states (e.g., *"You logged '⚡ Energized' on 85% of days where Morning Sunlight was completed"*).
+- **Obsidian / Logseq / Notion Daily Note Export**: 1-click export of reflection feeds as formatted `.md` files matching standard PKM frontmatter schemas.
+- **Reflection Writing Streaks**: Minimalist counter tracking consecutive days of qualitative journaling.
+
+---
+
 ## 📚 Documentation & Architecture
 
 Detailed project documentation is available in the repository:
