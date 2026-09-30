@@ -40,7 +40,8 @@ import {
   calculateStreak,
   calculateMonthStats,
   calculateDayOfWeekBreakdown,
-  generateAnnualHeatmap
+  generateAnnualHeatmap,
+  calculateCategoryDistribution
 } from './analytics.js';
 
 // Application State
@@ -51,6 +52,21 @@ const todayDate = new Date();
 let viewYear = todayDate.getFullYear();
 let viewMonth = todayDate.getMonth(); // 0-indexed
 let activeView = 'grid'; // 'grid' | 'analytics' | 'journal'
+
+// Filter & prompt state
+let analyticsHeatmapFilterHabitId = 'all';
+let activeJournalMoodFilter = 'all';
+let promptIndex = 0;
+const REFLECTION_PROMPTS = [
+  "What went surprisingly well today?",
+  "What habit gave you the most energy and focus?",
+  "What friction did you encounter, and how can you reduce it tomorrow?",
+  "What small win are you most proud of today?",
+  "How did your morning routine set the tone for the rest of your day?",
+  "If you had to redo today, what one thing would you adjust?",
+  "What identity habit are you actively building right now?",
+  "What are you genuinely grateful for today?"
+];
 
 // Pending modal state
 let activeCellModalData = null; // { habitId, dateKey, year, month, day }
@@ -337,6 +353,7 @@ function init() {
 // Cycling Themes List
 const THEMES = [
   { id: 'dark', label: 'Midnight', icon: '🌙' },
+  { id: 'oled', label: 'Midnight OLED', icon: '🖤' },
   { id: 'light', label: 'Paper Light', icon: '☀️' },
   { id: 'forest', label: 'Forest Sage', icon: '🌲' },
   { id: 'ocean', label: 'Nordic Ocean', icon: '🌊' },
@@ -573,7 +590,10 @@ function renderHabitGrid() {
               ${habit.archived ? '<span class="badge-archived">Archived</span>' : ''}
             </span>
             <div class="habit-meta-row">
-              <span class="habit-category-tag" style="border-left: 2px solid ${catColor};">${catName}</span>
+              <span class="habit-category-tag">
+                <span class="habit-cat-indicator" style="background-color: ${catColor};"></span>
+                ${catName}
+              </span>
               ${habit.frequencyType === 'numeric' && habit.targetMetric ? 
                 `<span class="habit-metric-tag">${habit.targetMetric.target} ${habit.targetMetric.unit}</span>` : ''}
               ${habit.frequencyType === 'specific_days' ? 
@@ -768,10 +788,26 @@ function handleCheckCellClick(e) {
     if (!prevGoalMet && newGoalMet) {
       celebrateGoalAchieved(habit);
     }
+
+    // Check if all active routines for today are now complete
+    const todayKey = formatDateKey(todayDate.getFullYear(), todayDate.getMonth(), todayDate.getDate());
+    if (dateKey === todayKey && checkAllDailyHabitsComplete(todayKey)) {
+      showToast('🌟 Outstanding! All daily routines completed for today! 🎯', 'success');
+      triggerCelebrationConfetti({ particleCount: 75, spread: 60, origin: { y: 0.7 } });
+    }
   }
 
   saveAppData(appData);
   renderHabitGrid();
+}
+
+function checkAllDailyHabitsComplete(dateKey) {
+  const active = appData.habits.filter(h => !h.archived);
+  if (active.length === 0) return false;
+  return active.every(h => {
+    const val = h.completions?.[dateKey];
+    return val === true || (typeof val === 'object' && val !== null && val.value > 0) || val === 'skipped';
+  });
 }
 
 // Right-click opens Quick Reflection / Daily Note
@@ -810,6 +846,7 @@ function celebrateGoalAchieved(habit) {
       origin: { y: 0.6 }
     });
   }
+  showToast(`🎉 Goal smashed for "${habit.title}"! Outstanding momentum!`, 'success');
 }
 
 // ==========================================
@@ -1183,6 +1220,7 @@ function handleHabitFormSubmit(e) {
   saveAppData(appData);
   closeHabitModal();
   updateView();
+  showToast(id ? `Updated routine "${title}"` : `Created routine "${title}"!`, 'success');
 }
 
 // ==========================================
@@ -1257,6 +1295,7 @@ function handleCellDetailSubmit(e) {
   saveAppData(appData);
   closeCellDetailModal();
   renderHabitGrid();
+  showToast(`Updated log for "${habit.title}"`, 'success');
 }
 
 // ==========================================
@@ -1406,6 +1445,22 @@ function renderAnalytics() {
   document.getElementById('kpiStreakHabit').textContent = maxStreak > 0 ? maxStreakHabit : 'Start a streak today!';
   document.getElementById('kpiTotalCheckins').textContent = totalLifetimeCompletions.toLocaleString();
 
+  // Populate Heatmap Habit Selector
+  const heatmapSelect = document.getElementById('heatmapHabitFilter');
+  if (heatmapSelect) {
+    const activeHabits = appData.habits.filter(h => !h.archived);
+    heatmapSelect.innerHTML = `<option value="all">All Habits (Cumulative)</option>` +
+      activeHabits.map(h => `<option value="${h.id}" ${h.id === analyticsHeatmapFilterHabitId ? 'selected' : ''}>${escapeHtml(h.title)}</option>`).join('');
+    
+    if (!heatmapSelect.hasAttribute('data-bound')) {
+      heatmapSelect.setAttribute('data-bound', 'true');
+      heatmapSelect.addEventListener('change', (e) => {
+        analyticsHeatmapFilterHabitId = e.target.value;
+        renderAnnualHeatmap();
+      });
+    }
+  }
+
   // 1. Annual Heatmap
   renderAnnualHeatmap();
 
@@ -1414,11 +1469,16 @@ function renderAnalytics() {
 
   // 3. Habit Leaderboard
   renderLeaderboard();
+
+  // 4. Category Effort Distribution
+  renderCategoryDistribution();
 }
 
 function renderAnnualHeatmap() {
   const container = document.getElementById('annualHeatmapContainer');
-  const heatmapData = generateAnnualHeatmap(appData.habits, viewYear);
+  if (!container) return;
+  const heatmapData = generateAnnualHeatmap(appData.habits, viewYear, analyticsHeatmapFilterHabitId);
+  const isSingleHabit = analyticsHeatmapFilterHabitId !== 'all';
 
   let gridHtml = '<div class="heatmap-grid-canvas">';
   const startDate = new Date(viewYear, 0, 1);
@@ -1430,12 +1490,16 @@ function renderAnnualHeatmap() {
     const count = heatmapData[k] || 0;
 
     let lvl = 'lvl-0';
-    if (count >= 5) lvl = 'lvl-4';
-    else if (count >= 3) lvl = 'lvl-3';
-    else if (count >= 2) lvl = 'lvl-2';
-    else if (count >= 1) lvl = 'lvl-1';
+    if (isSingleHabit) {
+      if (count >= 1) lvl = 'lvl-4';
+    } else {
+      if (count >= 5) lvl = 'lvl-4';
+      else if (count >= 3) lvl = 'lvl-3';
+      else if (count >= 2) lvl = 'lvl-2';
+      else if (count >= 1) lvl = 'lvl-1';
+    }
 
-    gridHtml += `<div class="heatmap-square ${lvl}" title="${k}: ${count} habits completed"></div>`;
+    gridHtml += `<div class="heatmap-square ${lvl}" title="${k}: ${count} ${count === 1 ? 'completion' : 'completions'}"></div>`;
     iter.setDate(iter.getDate() + 1);
   }
   gridHtml += '</div>';
@@ -1458,6 +1522,14 @@ function renderDayOfWeekChart() {
   `).join('');
 }
 
+function getMilestoneBadge(streak) {
+  if (streak >= 100) return `<span class="milestone-badge diamond" title="Centurion Milestone (100+ Days)">💎 100d</span>`;
+  if (streak >= 66) return `<span class="milestone-badge gold" title="Automaticity Habit Threshold (66+ Days)">🏆 66d</span>`;
+  if (streak >= 21) return `<span class="milestone-badge silver" title="Habit Loop Established (21+ Days)">🥈 21d</span>`;
+  if (streak >= 7) return `<span class="milestone-badge bronze" title="Momentum Builder (7+ Days)">🥉 7d</span>`;
+  return '';
+}
+
 function renderLeaderboard() {
   const container = document.getElementById('leaderboardList');
   const sorted = [...appData.habits]
@@ -1476,11 +1548,51 @@ function renderLeaderboard() {
         <span class="leaderboard-title">${item.habit.title}</span>
       </div>
       <div class="leaderboard-right">
+        ${getMilestoneBadge(item.streak.currentStreak)}
         <span class="streak-tag">🔥 ${item.streak.currentStreak}d (Best: ${item.streak.bestStreak}d)</span>
         <span class="badge-achieved">${item.streak.totalCompletions} check-ins</span>
       </div>
     </div>
   `).join('');
+}
+
+function renderCategoryDistribution() {
+  const container = document.getElementById('categoryDistributionContainer');
+  if (!container) return;
+  const categories = appData.categories || CATEGORIES;
+  const dist = calculateCategoryDistribution(appData.habits, viewYear, viewMonth, categories);
+
+  if (dist.length === 0 || dist.every(d => d.count === 0)) {
+    container.innerHTML = `
+      <div class="empty-state" style="padding: 16px 0;">
+        <p style="color: var(--text-muted); font-size: 0.85rem;">No habit completions logged yet for ${MONTH_NAMES[viewMonth]} ${viewYear}.</p>
+      </div>`;
+    return;
+  }
+
+  const progressBarHtml = `
+    <div class="category-dist-progress" title="Monthly effort distribution by category">
+      ${dist.map(d => d.percentage > 0 ? `
+        <div class="category-dist-segment" style="width: ${d.percentage}%; background-color: ${d.color};" title="${escapeHtml(d.name)}: ${d.percentage}% (${d.count} check-ins)"></div>
+      ` : '').join('')}
+    </div>
+  `;
+
+  const cardsHtml = `
+    <div class="category-dist-cards-grid">
+      ${dist.map(d => `
+        <div class="category-dist-card">
+          <div class="category-dist-card-left">
+            <span class="category-dist-dot" style="background-color: ${d.color};"></span>
+            <span class="category-dist-card-name">${escapeHtml(d.name)}</span>
+          </div>
+          <span class="category-dist-card-val">${d.percentage}% <span style="font-size: 0.7rem; font-weight: normal; color: var(--text-muted);">(${d.count})</span></span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  container.innerHTML = progressBarHtml + cardsHtml;
 }
 
 // ==========================================
@@ -1505,6 +1617,10 @@ function renderNotesFeed() {
 
   if (search) {
     notes = notes.filter(n => n.text.toLowerCase().includes(search));
+  }
+
+  if (activeJournalMoodFilter && activeJournalMoodFilter !== 'all') {
+    notes = notes.filter(n => (n.mood || '').toLowerCase().includes(activeJournalMoodFilter.toLowerCase()));
   }
 
   // Sort descending by date
@@ -1713,6 +1829,7 @@ function setupEventListeners() {
     settings.soundEnabled = !settings.soundEnabled;
     saveSettings(settings);
     updateSoundIcon();
+    showToast(settings.soundEnabled ? 'Sound feedback enabled 🔊' : 'Sound feedback muted 🔇', 'info');
   });
 
   // Pro Tools Dropdown
@@ -2218,6 +2335,30 @@ function setupEventListeners() {
   saveJournalNoteBtn.addEventListener('click', handleSaveJournalNote);
   journalSearchInput.addEventListener('input', renderNotesFeed);
 
+  const moodFiltersContainer = document.getElementById('journalMoodFilters');
+  if (moodFiltersContainer) {
+    moodFiltersContainer.addEventListener('click', (e) => {
+      const chip = e.target.closest('.mood-filter-chip');
+      if (!chip) return;
+      moodFiltersContainer.querySelectorAll('.mood-filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeJournalMoodFilter = chip.getAttribute('data-filter') || 'all';
+      renderNotesFeed();
+    });
+  }
+
+  const journalInspireBtn = document.getElementById('journalInspireBtn');
+  if (journalInspireBtn) {
+    journalInspireBtn.addEventListener('click', () => {
+      const prompt = REFLECTION_PROMPTS[promptIndex % REFLECTION_PROMPTS.length];
+      promptIndex++;
+      const current = journalTextInput.value.trim();
+      journalTextInput.value = (current ? current + "\n\n" : "") + prompt + "\n";
+      journalTextInput.focus();
+      showToast('Reflection prompt added 💡', 'info', 1500);
+    });
+  }
+
   notesFeedList.addEventListener('click', async (e) => {
     // Edit note
     const editBtn = e.target.closest('.edit-note-btn');
@@ -2353,6 +2494,7 @@ function setupEventListeners() {
     } else if (e.key === 't' || e.key === 'T') {
       e.preventDefault();
       jumpToToday();
+      showToast('Jumped to Today 📅', 'info', 1500);
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       goToPrevMonth();

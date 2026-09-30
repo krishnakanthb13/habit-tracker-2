@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./src/style.css?v=0.0.8">
+  <link rel="stylesheet" href="./src/style.css?v=0.0.10">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path d='m9 12 2 2 4-4' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
   <!-- Canvas Confetti Library (Supports both standalone browser and bundled environments) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
@@ -253,14 +253,19 @@
                 <h3 class="section-title">365-Day Consistency Matrix</h3>
                 <p class="section-desc">Visual activity heatmap across the entire year. Darker squares indicate more habits completed.</p>
               </div>
-              <div class="heatmap-legend">
-                <span>Less</span>
-                <span class="legend-cell level-0"></span>
-                <span class="legend-cell level-1"></span>
-                <span class="legend-cell level-2"></span>
-                <span class="legend-cell level-3"></span>
-                <span class="legend-cell level-4"></span>
-                <span>More</span>
+              <div class="heatmap-controls-row">
+                <select id="heatmapHabitFilter" class="heatmap-habit-filter" title="Filter heatmap by routine">
+                  <option value="all">All Habits (Cumulative)</option>
+                </select>
+                <div class="heatmap-legend">
+                  <span>Less</span>
+                  <span class="legend-cell level-0"></span>
+                  <span class="legend-cell level-1"></span>
+                  <span class="legend-cell level-2"></span>
+                  <span class="legend-cell level-3"></span>
+                  <span class="legend-cell level-4"></span>
+                  <span>More</span>
+                </div>
               </div>
             </div>
             <div class="annual-heatmap-wrapper" id="annualHeatmapContainer">
@@ -290,6 +295,19 @@
               <div class="leaderboard-list" id="leaderboardList">
                 <!-- Rendered dynamically -->
               </div>
+            </div>
+          </div>
+
+          <!-- Category Effort Distribution Section -->
+          <div class="analytics-section-card" style="margin-top: 24px;">
+            <div class="section-card-header">
+              <div class="section-title-wrap">
+                <h3 class="section-title">Category Balance & Effort Distribution</h3>
+                <p class="section-desc">Monthly completions breakdown across your custom life domains.</p>
+              </div>
+            </div>
+            <div id="categoryDistributionContainer" class="category-dist-container">
+              <!-- Rendered via JS -->
             </div>
           </div>
         </div>
@@ -326,7 +344,10 @@
               </div>
 
               <div class="form-group">
-                <label for="journalTextInput">Reflection / Thoughts</label>
+                <div class="journal-label-row">
+                  <label for="journalTextInput" style="margin-bottom: 0;">Reflection / Thoughts</label>
+                  <button type="button" id="journalInspireBtn" class="btn-ghost-sm" title="Insert a reflection prompt">💡 Inspire Me</button>
+                </div>
                 <textarea id="journalTextInput" class="form-textarea" rows="4" placeholder="What went well today? What did you learn?"></textarea>
               </div>
 
@@ -336,7 +357,16 @@
 
           <div class="journal-feed-area">
             <div class="feed-header">
-              <h3 class="feed-title">Reflection History</h3>
+              <div class="feed-header-left">
+                <h3 class="feed-title">Reflection History</h3>
+                <div class="journal-mood-filters" id="journalMoodFilters">
+                  <button type="button" class="mood-filter-chip active" data-filter="all">All</button>
+                  <button type="button" class="mood-filter-chip" data-filter="energized">⚡ Energized</button>
+                  <button type="button" class="mood-filter-chip" data-filter="focused">🎯 Focused</button>
+                  <button type="button" class="mood-filter-chip" data-filter="peaceful">🌿 Peaceful</button>
+                  <button type="button" class="mood-filter-chip" data-filter="tired">😴 Tired</button>
+                </div>
+              </div>
               <div class="feed-filter">
                 <input type="text" id="journalSearchInput" class="form-input form-input-sm" placeholder="Search notes...">
               </div>
@@ -458,6 +488,24 @@
               </div>
 
               <div class="guide-feature-card">
+                <div class="feature-card-icon">🏷️</div>
+                <div class="feature-card-body">
+                  <h4>Custom Category Studio</h4>
+                  <p>Organize routines your way. Create custom life domains, edit names and hex colors, and reorder categories. Deleting a category prompts a safe reassignment dialog so your habits are never lost or orphaned.</p>
+                  <span class="feature-pill-tag">Category Management</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">📝</div>
+                <div class="feature-card-body">
+                  <h4>Daily Reflections & Notes</h4>
+                  <p>Log qualitative thoughts alongside check-ins. Press <kbd>J</kbd>, right-click any day cell, or click the blue note indicator dot on the grid to attach reflections and mood badges to any date or specific habit.</p>
+                  <span class="feature-pill-tag">Right-Click & Note Dots</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
                 <div class="feature-card-icon">🎨</div>
                 <div class="feature-card-body">
                   <h4>Theme Cycling</h4>
@@ -480,6 +528,10 @@
                   <tr>
                     <td><kbd>N</kbd></td>
                     <td>Open New Habit creator dialog</td>
+                  </tr>
+                  <tr>
+                    <td><kbd>J</kbd></td>
+                    <td>Open Quick Daily Reflection / Journal entry</td>
                   </tr>
                   <tr>
                     <td><kbd>T</kbd></td>
@@ -1070,6 +1122,6 @@
   </div>
 
   <!-- Main JavaScript bundle -->
-  <script type="module" src="./src/app.js?v=0.0.8"></script>
+  <script type="module" src="./src/app.js?v=0.0.10"></script>
 </body>
 </html>

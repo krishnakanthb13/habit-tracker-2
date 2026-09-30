@@ -179,12 +179,14 @@ export function calculateDayOfWeekBreakdown(habits, year, month) {
   });
 }
 
-// Generate 365-day Activity Matrix (GitHub / Heatmap style)
-export function generateAnnualHeatmap(habits, currentYear = new Date().getFullYear()) {
+// Generate 365-day Activity Matrix (GitHub / Heatmap style) with optional habit filtering
+export function generateAnnualHeatmap(habits, currentYear = new Date().getFullYear(), filterHabitId = 'all') {
   const heatmap = {}; // 'YYYY-MM-DD' => total completions on that date
-  const activeHabits = habits.filter(h => !h.archived);
+  const targetHabits = habits
+    .filter(h => !h.archived)
+    .filter(h => filterHabitId === 'all' || h.id === filterHabitId);
 
-  activeHabits.forEach(habit => {
+  targetHabits.forEach(habit => {
     Object.entries(habit.completions || {}).forEach(([dateKey, val]) => {
       if (val === true || (typeof val === 'object' && val !== null && val.value > 0)) {
         heatmap[dateKey] = (heatmap[dateKey] || 0) + 1;
@@ -193,4 +195,45 @@ export function generateAnnualHeatmap(habits, currentYear = new Date().getFullYe
   });
 
   return heatmap;
+}
+
+// Category Distribution / Effort Breakdown for active month
+export function calculateCategoryDistribution(habits, year, month, categories = []) {
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const activeHabits = habits.filter(h => !h.archived);
+  const catMap = {};
+
+  categories.forEach(c => {
+    catMap[c.id] = { id: c.id, name: c.name, color: c.color, count: 0, habitCount: 0 };
+  });
+  if (!catMap['general']) {
+    catMap['general'] = { id: 'general', name: 'General', color: '#64748b', count: 0, habitCount: 0 };
+  }
+
+  let totalCompletions = 0;
+
+  activeHabits.forEach(habit => {
+    const catId = habit.category || 'general';
+    if (!catMap[catId]) {
+      catMap[catId] = { id: catId, name: catId, color: habit.color || '#64748b', count: 0, habitCount: 0 };
+    }
+    catMap[catId].habitCount++;
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const k = formatDateKey(year, month, d);
+      const val = habit.completions?.[k];
+      if (val === true || (typeof val === 'object' && val !== null && val.value > 0)) {
+        catMap[catId].count++;
+        totalCompletions++;
+      }
+    }
+  });
+
+  return Object.values(catMap)
+    .filter(c => c.habitCount > 0 || c.count > 0)
+    .map(c => ({
+      ...c,
+      percentage: totalCompletions > 0 ? Math.round((c.count / totalCompletions) * 100) : 0
+    }))
+    .sort((a, b) => b.count - a.count);
 }

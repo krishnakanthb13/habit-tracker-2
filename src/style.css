@@ -90,6 +90,41 @@
   --scrollbar-track: transparent;
 }
 
+/* Midnight OLED Pure Black Theme */
+[data-theme="oled"] {
+  --bg-main: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-surface-elevated: #141414;
+  --bg-surface-hover: #202020;
+  --bg-surface-subtle: #080808;
+
+  --border-subtle: #1e1e1e;
+  --border-strong: #333333;
+  --border-highlight: #4a4a4a;
+
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #666666;
+  --text-inverse: #000000;
+
+  --primary: #10b981;
+  --primary-hover: #059669;
+  --primary-subtle: rgba(16, 185, 129, 0.15);
+  --primary-glow: rgba(16, 185, 129, 0.45);
+
+  --today-col-bg: rgba(16, 185, 129, 0.12);
+  --weekend-col-bg: rgba(255, 255, 255, 0.015);
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.85);
+  --shadow-md: 0 4px 14px -1px rgba(0, 0, 0, 0.95);
+  --shadow-lg: 0 14px 28px -4px rgba(0, 0, 0, 1);
+  --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.4);
+  --scrollbar-track: transparent;
+}
+
 /* Forest Sage Theme */
 [data-theme="forest"] {
   --bg-main: #06110a;
@@ -813,21 +848,43 @@ button {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 2px;
+  margin-top: 3px;
+  flex-wrap: wrap;
 }
 
 .habit-category-tag {
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  padding: 1.5px 7px 1.5px 6px;
+  border-radius: var(--radius-sm);
   text-transform: capitalize;
+  line-height: 1.3;
+}
+
+.habit-cat-indicator {
+  width: 3px;
+  height: 9px;
+  border-radius: 1.5px;
+  flex-shrink: 0;
 }
 
 .habit-metric-tag {
+  display: inline-flex;
+  align-items: center;
   font-size: 0.65rem;
+  font-weight: 500;
   background-color: var(--bg-surface-elevated);
   color: var(--text-secondary);
-  padding: 1px 6px;
+  border: 1px solid var(--border-subtle);
+  padding: 1.5px 6px;
   border-radius: var(--radius-sm);
+  line-height: 1.3;
 }
 
 /* Day Check Cells */
@@ -1148,6 +1205,25 @@ button {
 }
 
 /* Heatmap */
+.heatmap-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.heatmap-habit-filter {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+
 .heatmap-legend {
   display: flex;
   align-items: center;
@@ -1303,6 +1379,107 @@ button {
   color: #fb923c;
 }
 
+/* Milestone Badges */
+.milestone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.milestone-badge.bronze {
+  background: rgba(205, 127, 50, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(205, 127, 50, 0.35);
+}
+
+.milestone-badge.silver {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.milestone-badge.gold {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+  border: 1px solid rgba(234, 179, 8, 0.4);
+}
+
+.milestone-badge.diamond {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
+/* Category Effort Distribution */
+.category-dist-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.category-dist-progress {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+.category-dist-segment {
+  height: 100%;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.category-dist-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.category-dist-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.category-dist-card-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.category-dist-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.category-dist-card-name {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.category-dist-card-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
 /* =========================================
    VIEW 3: JOURNAL & NOTES (PRO UNLOCKED)
    ========================================= */
@@ -1362,6 +1539,29 @@ button {
   font-weight: 600;
 }
 
+.journal-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.btn-ghost-sm {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+
+.btn-ghost-sm:hover {
+  background-color: var(--primary-subtle);
+}
+
 .journal-feed-area {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -1373,13 +1573,53 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.feed-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .feed-title {
   font-family: var(--font-display);
   font-size: 1.1rem;
   font-weight: 700;
+}
+
+.journal-mood-filters {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.mood-filter-chip {
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  background-color: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.mood-filter-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.mood-filter-chip.active {
+  background-color: var(--text-primary);
+  color: var(--text-inverse);
+  border-color: var(--text-primary);
+  font-weight: 600;
 }
 
 .notes-feed-list {

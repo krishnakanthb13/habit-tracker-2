@@ -65,14 +65,15 @@ npx vercel
 4. **Streak Protection / Freeze Days (🛡️)**:
    - **Alt-click** any cell to freeze your streak during sick, travel, or rest days without breaking continuous momentum.
 5. **Advanced Analytics & Streaks Matrix**:
-   - **365-Day Consistency Heatmap**: Full GitHub-style annual activity matrix.
+   - **Individual Habit Heatmap Drilldown**: Filter the 365-day annual consistency matrix to view completion history for any individual routine or all habits combined.
+   - **Category Balance & Effort Distribution**: Real-time progress bar and metrics breakdown showing monthly completion percentages across custom life domains.
+   - **Streak Milestone Badges**: Gamified recognition on the leaderboard: 💎 **100d Centurion**, 🏆 **66d Automaticity**, 🥈 **21d Habit Loop**, and 🥉 **7d Momentum**.
    - **Discipline by Day of Week**: Bar chart identifying your peak productivity days.
-   - **Habit Leaderboard**: Current streaks vs all-time records with flame counters 🔥.
    - **Real-Time KPIs**: Monthly completion rate, goals smashed, and lifetime repetitions.
 6. **Integrated Daily Journal & Quick Reflections**:
    - **Frictionless Grid Reflections**: Add or edit daily thoughts directly from the Habit Grid by **Right-clicking any cell**, clicking the header **Daily Note** icon, tapping the habit row `📝` action, clicking the glowing blue cell note dot (`.has-note-dot`), or pressing <kbd>J</kbd>.
-   - Attach reflections and mood tags (`⚡ Energized`, `🎯 Focused`, `🌿 Peaceful`, `🌧️ Struggling`, `🚀 Victorious`) to any date or habit.
-   - Long habit titles wrap gracefully without horizontal scrollbars, preserving pristine layout on any screen size.
+   - **Mood Filter Chips**: Filter your reflection history instantly by mood tag (`All`, `⚡ Energized`, `🎯 Focused`, `🌿 Peaceful`, `😴 Tired`).
+   - **Inspire Me Prompts (💡)**: One-click thought provokers for moments of writer's block.
    - Searchable reflection history with blue indicator dots directly on grid cells, plus one-click reflection card editing.
 7. **Habit Archiving & Un-Archiving Vault (📦)**:
    - **Non-Destructive Pausing**: Retire or pause habits without permanently deleting your history, lifetime streaks, or reflections.
@@ -90,13 +91,20 @@ npx vercel
      - ⚠️ **Reset Data**: Protected Danger Zone to reset to starter demo routines or wipe data to a blank canvas.
    - **100% Offline & Local**: Your routine data never leaves your browser origin.
    - **Quick Pro Tools Menu**: 1-click downloads for Month CSV, Lifetime CSV, and JSON Backups without opening full modals.
-9. **5 Cycling Color Themes & Tactile Audio**:
-   - One-click cycling between 5 curated themes: **Midnight OLED Dark 🌙**, **Crisp Paper Light ☀️**, **Forest Sage 🌲**, **Nordic Ocean 🌊**, and **Sunset Ember 🌅**.
+9. **6 Cycling Color Themes & Tactile Audio**:
+   - One-click cycling between 6 curated themes: **Midnight Dark 🌙**, **Midnight OLED Pure Black 🖤**, **Crisp Paper Light ☀️**, **Forest Sage 🌲**, **Nordic Ocean 🌊**, and **Sunset Ember 🌅**.
    - Synthesized pop sounds and celebration chords on milestone completions via the native Web Audio API.
    - Resilient celebration confetti burst upon completing monthly goals that works out-of-the-box across both bundled and standalone static environments.
-10. **Dedicated "How to Use" User Manual & Guide**:
-    - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze, numeric logging, habit archive/restore vault, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
-11. **In-App Confirmation Dialogs & Non-Destructive Guards**:
+10. **Custom Category Management Studio (🏷️)**:
+    - **Full Domain Control**: Create, rename, recolor, and organize custom life categories (Health & Body, Focus & Work, Mind & Peace, Knowledge, Fitness & Sport, etc.).
+    - **Safe Deletion & Auto-Reassignment**: Deleting a category prompts a safe selection modal allowing you to reassign all associated habits to another category or General, ensuring no habit is ever orphaned.
+    - **Themed Custom Scrollbars**: Dedicated category list with theme-synchronized custom scrollbars across all dark and light palettes.
+11. **Comprehensive Toast Notification & Feedback System (🍞)**:
+    - Non-intrusive animated feedback across key application actions: daily 100% routine completion celebration, routine creation & editing, metric updates, sound feedback muting/unmuting, streak freeze shields, goal smashed celebrations, jumping to today (<kbd>T</kbd>), and JSON/CSV data operations.
+    - Interactive 1-click **Undo** toasts for instant reversal of archiving or routine restorations.
+12. **Dedicated "How to Use" User Manual & Guide**:
+    - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze, numeric logging, category studio, reflection journaling, habit archive/restore vault, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
+13. **In-App Confirmation Dialogs & Non-Destructive Guards**:
     - Custom non-blocking modal dialogs protect against accidental data wiping, habit deletion, or reflection loss with clear warning previews and <kbd>Esc</kbd> dismissal.
 
 ---

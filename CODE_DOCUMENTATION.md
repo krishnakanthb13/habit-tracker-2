@@ -82,7 +82,8 @@ graph TD
 | `calculateStreak(habit)` | `habit: Object` | Calculates current streak, longest streak, and total completed days, respecting `skipped` (Streak Freeze) days. |
 | `calculateMonthStats(habits, y, m)` | `habits: Array, y: Number, m: Number` | Calculates total completed days, completion percentage, and goals met for a given month. |
 | `calculateDayOfWeekBreakdown(habits)` | `habits: Array` | Aggregates check-ins across Monday through Sunday. |
-| `generateAnnualHeatmap(habits, y)` | `habits: Array, y: Number` | Generates a 365-day map with level intensity (0-4) for the consistency matrix. |
+| `generateAnnualHeatmap(habits, y, filterHabitId)` | `habits: Array, y: Number, filterHabitId?: String` | Generates a 365-day map with level intensity (0-4) for the consistency matrix, supporting optional routine filtering. |
+| `calculateCategoryDistribution(habits, y, m, categories)` | `habits: Array, y: Number, m: Number, categories: Array` | Computes monthly check-in counts and percentages across custom life domains. |
 
 ### `src/audio.js`
 | Function | Parameters | Description |
@@ -98,7 +99,7 @@ graph TD
 | `showConfirmation(options)` | `options: Object` | Promise-based custom modal for confirmations (`title`, `message`, `icon`, `confirmText`, `confirmType`). |
 | `showToast(message, type, duration, action)` | `message: String, type?: String, duration?: Number, action?: Object` | Displays animated toast notifications (`success`, `warn`, `error`) with optional interactive 1-click `action` ({ text, onClick }) for instant Undo. |
 | `triggerCelebrationConfetti(options)` | `options?: Object` | Resilient confetti helper supporting both browser global (`window.confetti`) and bundlers without halting execution in unbundled environments. |
-| `cycleTheme()` | none | Cycles between 5 curated themes (`dark`, `light`, `forest`, `ocean`, `sunset`). |
+| `cycleTheme()` | none | Cycles between 6 curated themes (`dark`, `oled`, `light`, `forest`, `ocean`, `sunset`). |
 | `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers, archived badges, and dynamic unarchive row buttons. |
 | `openQuickNoteModal(date, habitId, noteId)` | `date?: String, habitId?: String, noteId?: String` | Opens daily reflection dialog pre-populated for given date/habit with mood chips, non-overflowing titles, and preserved archived tags. |
 | `closeQuickNoteModal()` | none | Closes reflection modal and resets text inputs. |
@@ -106,8 +107,9 @@ graph TD
 | `openDataModal(tab)` | `tab?: String` | Opens the 900px wide Data Management modal with vertical tabs (`export`, `import`, `archived`, `reset`). |
 | `switchDataTab(tabName)` | `tabName: String` | Toggles active tab panels and sidebar buttons, rendering the archived routines vault on demand. |
 | `renderDataModalArchivedList()` | none | Renders the list of paused routines in the Data Vault with habit swatches, individual restore buttons, and batch restore. |
-| `renderAnalytics()` | none | Populates KPI cards, 365-day activity matrix, day-of-week bars, and leaderboard (filtered strictly to active habits). |
-| `renderJournal()` | none | Displays daily reflection feed with mood badges, 1-click edit buttons, and search filter. |
+| `renderAnalytics()` | none | Populates KPI cards, 365-day activity matrix (with routine filter), category effort distribution, day-of-week bars, and leaderboard with milestone badges. |
+| `renderCategoryDistribution()` | none | Renders the monthly category effort progress bar and category cards. |
+| `renderJournal()` | none | Displays daily reflection feed with mood chips filter, prompt ideas generator, 1-click edit buttons, and search filter. |
 | `openCategoryModal()` | none | Opens the Category Manager dialog, populates swatches, and renders existing categories. |
 | `closeCategoryModal()` | none | Closes Category Manager dialog and resets edit state. |
 | `setCategoryEditMode(catId)` | `catId: String` | Loads targeted category into edit form for real-time renaming and color updating. |
@@ -159,9 +161,10 @@ sequenceDiagram
    - `applyTheme(settings.theme)` applies theme to document root `[data-theme]`.
    - Event listeners bound for month navigation, view tabs, shortcuts, and modals.
 2. **Runtime Interactions**:
-   - User inputs trigger localized state mutations and audio synthesis.
+   - User inputs trigger localized state mutations, audio synthesis, and visual feedback toasts.
+   - Non-disruptive toast alerts notify users on habit creation, updates, category changes, sound toggling, goal milestones, and data exports.
    - State changes immediately call `saveAppData()`.
-   - Re-rendering uses batch innerHTML updates with minimal DOM thrashing.
+   - Grid rendering uses structured `.habit-category-tag` pills with `.habit-cat-indicator` rounded color bars and cohesive spacing next to quantitative metric tags.
 3. **Offline Reliability**:
    - No external APIs or servers are queried during runtime.
    - 100% of data remains on the user's device.

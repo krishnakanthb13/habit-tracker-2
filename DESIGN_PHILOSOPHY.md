@@ -71,6 +71,11 @@ In *Atomic Habits*, behavior change is rooted in identity ("I am a runner", "I a
 - By providing full freedom to **add, rename, re-color, and customize categories**, DailyHabits Pro empowers users to model their tracking environment after their actual aspirations (e.g., `Deep Tech`, `Mindful Fatherhood`, `Creative Writing`, `Financial Independence`).
 - Deletions are safeguarded with automated habit migration to guarantee that routine histories are never severed or corrupted.
 
+### IX. Effort Symmetry & Gamified Milestones
+Habit building thrives on gradual milestones rather than an all-or-nothing binary mindset:
+- **Milestone Badges**: Recognizing streaks at 7 days (Momentum), 21 days (Habit Loop), 66 days (Automaticity Threshold), and 100 days (Centurion) anchors long-term commitment with non-intrusive trophies.
+- **Effort Symmetry**: Visualizing monthly category balance through segmented distribution bars prevents tunnel vision and encourages balanced holistic growth across health, work, and peace.
+
 ---
 
 ## 4. Target Audience & Use Cases
@@ -90,4 +95,5 @@ In *Atomic Habits*, behavior change is rooted in identity ("I am a runner", "I a
 | **LocalStorage Persistence** | Data is scoped to the specific browser origin. | Eliminates server costs, database maintenance, and privacy liabilities. Mitigated by one-click JSON backup & restore. |
 | **Custom In-App Modals** | Extra custom component code instead of `window.confirm()`. | Native dialogs are often blocked by browsers, look jarring, and freeze background threads. Custom modals provide predictable, accessible, and beautiful confirmations. |
 | **Vertical Navigation Data Hub** | Requires 2-column modal layout and responsive CSS. | Replaces cramped horizontal tabs with a desktop-class 900px hub that gives export cards, import tools, and archived routine lists dedicated space to breathe. |
+| **Non-Disruptive Toast Engine** | Requires lightweight dynamic DOM toaster instead of silent persistence. | Keeps the UI snappy without modal interruptions, providing immediate confirmation on routine updates, sound muting, and milestone smashes while delivering 1-click Undo for reversible actions. |
 | **Centralized Danger Zone** | Destructive actions (reset, wipe) removed from quick menus. | Confining destructive actions strictly inside the Data Manager modal behind double confirmation guards prevents catastrophic accidental data loss while keeping non-destructive exports ubiquitous. |
