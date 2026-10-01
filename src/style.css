@@ -227,6 +227,146 @@
   --scrollbar-track: transparent;
 }
 
+/* Warm Latte Theme (Light) */
+[data-theme="latte"] {
+  --bg-main: #fbf8f3;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #f5efe6;
+  --bg-surface-hover: #ebe2d5;
+  --bg-surface-subtle: #f8f3ec;
+
+  --border-subtle: #e8ded2;
+  --border-strong: #d4c5b3;
+  --border-highlight: #a3907c;
+
+  --text-primary: #2c2017;
+  --text-secondary: #635041;
+  --text-muted: #968272;
+  --text-inverse: #ffffff;
+
+  --primary: #d97706;
+  --primary-hover: #b45309;
+  --primary-subtle: rgba(217, 119, 6, 0.12);
+  --primary-glow: rgba(217, 119, 6, 0.3);
+
+  --today-col-bg: rgba(217, 119, 6, 0.09);
+  --weekend-col-bg: rgba(0, 0, 0, 0.018);
+
+  --shadow-sm: 0 1px 3px rgba(44, 32, 23, 0.05);
+  --shadow-md: 0 4px 12px rgba(44, 32, 23, 0.08);
+  --shadow-lg: 0 10px 25px rgba(44, 32, 23, 0.12);
+  --shadow-glow: 0 0 15px rgba(217, 119, 6, 0.2);
+
+  --scrollbar-thumb: rgba(99, 80, 65, 0.2);
+  --scrollbar-thumb-hover: rgba(99, 80, 65, 0.4);
+  --scrollbar-track: transparent;
+}
+
+/* Matcha Meadow Theme (Light) */
+[data-theme="meadow"] {
+  --bg-main: #f3f8f4;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e7f2e8;
+  --bg-surface-hover: #d7e8d8;
+  --bg-surface-subtle: #ecf5ed;
+
+  --border-subtle: #d0e4d2;
+  --border-strong: #b2d2b5;
+  --border-highlight: #70a775;
+
+  --text-primary: #112918;
+  --text-secondary: #2f5638;
+  --text-muted: #5e8467;
+  --text-inverse: #ffffff;
+
+  --primary: #16a34a;
+  --primary-hover: #15803d;
+  --primary-subtle: rgba(22, 163, 74, 0.12);
+  --primary-glow: rgba(22, 163, 74, 0.3);
+
+  --today-col-bg: rgba(22, 163, 74, 0.09);
+  --weekend-col-bg: rgba(0, 0, 0, 0.018);
+
+  --shadow-sm: 0 1px 3px rgba(17, 41, 24, 0.05);
+  --shadow-md: 0 4px 12px rgba(17, 41, 24, 0.08);
+  --shadow-lg: 0 10px 25px rgba(17, 41, 24, 0.12);
+  --shadow-glow: 0 0 15px rgba(22, 163, 74, 0.2);
+
+  --scrollbar-thumb: rgba(47, 86, 56, 0.2);
+  --scrollbar-thumb-hover: rgba(47, 86, 56, 0.4);
+  --scrollbar-track: transparent;
+}
+
+/* Nordic Frost Theme (Light) */
+[data-theme="arctic"] {
+  --bg-main: #f1f6fc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #e2effb;
+  --bg-surface-hover: #d2e4f7;
+  --bg-surface-subtle: #ebf3fb;
+
+  --border-subtle: #cde0f3;
+  --border-strong: #a7ccef;
+  --border-highlight: #649ed8;
+
+  --text-primary: #0a213e;
+  --text-secondary: #235180;
+  --text-muted: #5a84af;
+  --text-inverse: #ffffff;
+
+  --primary: #0284c7;
+  --primary-hover: #0369a1;
+  --primary-subtle: rgba(2, 132, 199, 0.12);
+  --primary-glow: rgba(2, 132, 199, 0.3);
+
+  --today-col-bg: rgba(2, 132, 199, 0.09);
+  --weekend-col-bg: rgba(0, 0, 0, 0.018);
+
+  --shadow-sm: 0 1px 3px rgba(10, 33, 62, 0.05);
+  --shadow-md: 0 4px 12px rgba(10, 33, 62, 0.08);
+  --shadow-lg: 0 10px 25px rgba(10, 33, 62, 0.12);
+  --shadow-glow: 0 0 15px rgba(2, 132, 199, 0.2);
+
+  --scrollbar-thumb: rgba(35, 81, 128, 0.2);
+  --scrollbar-thumb-hover: rgba(35, 81, 128, 0.4);
+  --scrollbar-track: transparent;
+}
+
+/* Sakura Dawn Theme (Light) */
+[data-theme="blossom"] {
+  --bg-main: #fff5f7;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #fae6ec;
+  --bg-surface-hover: #f5d4de;
+  --bg-surface-subtle: #fef0f4;
+
+  --border-subtle: #f4ccd7;
+  --border-strong: #ebb1c0;
+  --border-highlight: #d67891;
+
+  --text-primary: #38121f;
+  --text-secondary: #742e44;
+  --text-muted: #a35970;
+  --text-inverse: #ffffff;
+
+  --primary: #e11d48;
+  --primary-hover: #be123c;
+  --primary-subtle: rgba(225, 29, 72, 0.12);
+  --primary-glow: rgba(225, 29, 72, 0.3);
+
+  --today-col-bg: rgba(225, 29, 72, 0.09);
+  --weekend-col-bg: rgba(0, 0, 0, 0.018);
+
+  --shadow-sm: 0 1px 3px rgba(56, 18, 31, 0.05);
+  --shadow-md: 0 4px 12px rgba(56, 18, 31, 0.08);
+  --shadow-lg: 0 10px 25px rgba(56, 18, 31, 0.12);
+  --shadow-glow: 0 0 15px rgba(225, 29, 72, 0.2);
+
+  --scrollbar-thumb: rgba(116, 46, 68, 0.2);
+  --scrollbar-thumb-hover: rgba(116, 46, 68, 0.4);
+  --scrollbar-track: transparent;
+}
+
 /* Base resets */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -3493,6 +3633,229 @@ kbd {
   padding: 3px 8px;
   font-size: 0.72rem;
 }
+
+/* =========================================
+   PWA INSTALL BUTTON & PROMPTS
+   ========================================= */
+.btn-pwa-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: var(--text-inverse);
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--primary-glow);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-pwa-install:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--primary-glow);
+  filter: brightness(1.08);
+}
+
+.btn-pwa-install.hidden {
+  display: none !important;
+}
+
+.btn-pwa-install svg {
+  flex-shrink: 0;
+}
+
+/* PWA Install Modal Specifics */
+.pwa-modal-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.pwa-modal-icon-wrap img,
+.pwa-modal-icon-wrap svg {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.pwa-benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+  background-color: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.pwa-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pwa-benefit-icon {
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+.pwa-benefit-item strong {
+  display: block;
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.pwa-benefit-item p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.pwa-ios-instructions {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px dashed var(--primary);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.pwa-ios-instructions strong {
+  color: var(--text-primary);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.pwa-ios-instructions ol {
+  padding-left: 18px;
+  margin: 0;
+}
+
+/* =========================================
+   THEME GALLERY MODAL
+   ========================================= */
+.theme-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.theme-card {
+  background-color: var(--bg-surface-elevated);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition-fast);
+  position: relative;
+  text-align: left;
+}
+
+.theme-card:hover {
+  border-color: var(--border-highlight);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-card.active {
+  border-color: var(--primary);
+  background-color: var(--primary-subtle);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.theme-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.theme-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-card-emoji {
+  font-size: 1.25rem;
+}
+
+.theme-card-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.theme-card-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+
+.theme-card-badge.badge-dark {
+  background-color: rgba(0, 0, 0, 0.4);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-card-badge.badge-light {
+  background-color: rgba(255, 255, 255, 0.85);
+  color: #334155;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.theme-card-active-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.theme-card-palette {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.palette-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
 
 
 

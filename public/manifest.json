@@ -1,0 +1,49 @@
+{
+  "name": "DailyHabits Pro - Minimalist Habit Tracker",
+  "short_name": "DailyHabits",
+  "description": "Ultra-lightweight, beautiful daily habit tracker with all paywalled features unlocked. Unlimited habits, streaks, analytics, journaling, and 100% offline privacy.",
+  "id": "dailyhabits-pro-app",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0b0f19",
+  "theme_color": "#10b981",
+  "categories": ["productivity", "health", "utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Jump to Today",
+      "short_name": "Today",
+      "description": "Jump to today's habit check-ins",
+      "url": "./index.html",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

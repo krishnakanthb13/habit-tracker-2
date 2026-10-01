@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="100%" stop-color="#064e3b" />
+    </linearGradient>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#10b981" flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect x="8" y="8" width="496" height="496" rx="104" stroke="#10b981" stroke-opacity="0.3" stroke-width="6" />
+  <g filter="url(#glow)">
+    <path d="M410 240 A154 154 0 1 1 350 135" stroke="url(#primaryGrad)" stroke-width="26" stroke-linecap="round" fill="none" />
+    <polyline points="190,260 238,308 340,195" stroke="#ffffff" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+    <circle cx="350" cy="135" r="14" fill="#34d399" />
+  </g>
+</svg>

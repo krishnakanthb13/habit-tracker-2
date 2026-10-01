@@ -76,6 +76,18 @@ Habit building thrives on gradual milestones rather than an all-or-nothing binar
 - **Milestone Badges**: Recognizing streaks at 7 days (Momentum), 21 days (Habit Loop), 66 days (Automaticity Threshold), and 100 days (Centurion) anchors long-term commitment with non-intrusive trophies.
 - **Effort Symmetry**: Visualizing monthly category balance through segmented distribution bars prevents tunnel vision and encourages balanced holistic growth across health, work, and peace.
 
+### X. Circadian & Aesthetic Symmetry (Equal 5 Light & 5 Dark Themes)
+A habit tracker is used across radically different biological states and lighting conditions: early morning journaling by the window, midday focus in a brightly lit office, and late-night reflection in a dark bedroom:
+- **50/50 Dual-Paletted Architecture**: Rather than treating light mode as a low-contrast afterthought, DailyHabits Pro provides a strict 1:1 balance of **5 Dark and 5 Light curated themes**.
+- **Paired Identities**: Each deep dark theme has an evocative light counterpart sharing harmonized accent hues (Midnight ⇄ Paper Light, Midnight OLED ⇄ Warm Latte, Forest Sage ⇄ Matcha Meadow, Nordic Ocean ⇄ Nordic Frost, Sunset Ember ⇄ Sakura Dawn).
+- **Dynamic Chromatic Adaptation**: The mobile browser status bar and desktop PWA window frame automatically synchronize their theme color to match the user's active emotional and visual workspace.
+
+### XI. The Sovereign Web App (Native PWA Independence Without Native App Bloat)
+Traditional productivity software forces a painful dilemma: either stay trapped inside browser tabs surrounded by bookmarks and distractions, or install a 150 MB Electron wrapper that hogs system RAM and drains battery life:
+- **PWA Standalone Sovereignty**: DailyHabits Pro installs directly to the operating system (Windows, macOS, Linux, Android, iOS Safari) as a first-class citizen with its own desktop icon and dedicated window frame.
+- **Zero-Bloat Featherweight Footprint**: The entire application bundle (scripts, styles, icons, sound synthesizers, and service worker) weighs **under ~45 kB gzipped**—roughly 1/3,000th the size of an average desktop electron habit app.
+- **True Offline Autonomy**: Habits, streak calculations, journal feeds, and JSON exports remain fully functional on an airplane, subway, or off-grid cabin.
+
 ---
 
 ## 4. Target Audience & Use Cases
@@ -91,8 +103,10 @@ Habit building thrives on gradual milestones rather than an all-or-nothing binar
 
 | Decision | Trade-off | Rationale |
 |---|---|---|
-| **Vanilla HTML/CSS/JS** | No React/Vue/Angular reactivity boilerplate. | Ensures near-instant page load (<50ms), ultra-small bundle size (~25 kB), and zero framework obsolescence over a decade. |
+| **Vanilla HTML/CSS/JS** | No React/Vue/Angular reactivity boilerplate. | Ensures near-instant page load (<50ms), ultra-small bundle size (~45 kB), and zero framework obsolescence over a decade. |
 | **LocalStorage Persistence** | Data is scoped to the specific browser origin. | Eliminates server costs, database maintenance, and privacy liabilities. Mitigated by one-click JSON backup & restore. |
+| **Native PWA Service Worker** | Requires explicit cache lifecycle management (`dailyhabits-pro-v2`). | Bypasses bloated desktop frameworks (Electron/Tauri) while giving users standalone window installation, instant launch, and 100% offline access. |
+| **Symmetric 10-Theme Tokens** | CSS variable definitions required for 10 distinct palettes. | Ensures equal visual dignity for light-mode morning journalers and OLED dark-mode night owls without adding CSS file weight (~10 kB gzipped). |
 | **Custom In-App Modals** | Extra custom component code instead of `window.confirm()`. | Native dialogs are often blocked by browsers, look jarring, and freeze background threads. Custom modals provide predictable, accessible, and beautiful confirmations. |
 | **Vertical Navigation Data Hub** | Requires 2-column modal layout and responsive CSS. | Replaces cramped horizontal tabs with a desktop-class 900px hub that gives export cards, import tools, and archived routine lists dedicated space to breathe. |
 | **Non-Disruptive Toast Engine** | Requires lightweight dynamic DOM toaster instead of silent persistence. | Keeps the UI snappy without modal interruptions, providing immediate confirmation on routine updates, sound muting, and milestone smashes while delivering 1-click Undo for reversible actions. |

@@ -106,6 +106,21 @@ const themeCycleBtn = document.getElementById('themeCycleBtn');
 const themeCycleIcon = document.getElementById('themeCycleIcon');
 const themeCycleLabel = document.getElementById('themeCycleLabel');
 
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const proToolsInstallBtn = document.getElementById('proToolsInstallBtn');
+const pwaInstallModal = document.getElementById('pwaInstallModal');
+const closePwaModalBtn = document.getElementById('closePwaModalBtn');
+const closePwaModalFooterBtn = document.getElementById('closePwaModalFooterBtn');
+const pwaModalInstallActionBtn = document.getElementById('pwaModalInstallActionBtn');
+const pwaIosInstructions = document.getElementById('pwaIosInstructions');
+const pwaDesktopInstructions = document.getElementById('pwaDesktopInstructions');
+
+const proToolsThemesBtn = document.getElementById('proToolsThemesBtn');
+const themeGalleryModal = document.getElementById('themeGalleryModal');
+const closeThemeGalleryBtn = document.getElementById('closeThemeGalleryBtn');
+const closeThemeGalleryFooterBtn = document.getElementById('closeThemeGalleryFooterBtn');
+const themeGalleryGrid = document.getElementById('themeGalleryGrid');
+
 const proToolsMenuBtn = document.getElementById('proToolsMenuBtn');
 const proToolsDropdown = document.getElementById('proToolsDropdown');
 
@@ -234,6 +249,8 @@ const saveCategoryBtn = document.getElementById('saveCategoryBtn');
 const categoryTotalCount = document.getElementById('categoryTotalCount');
 const categoriesManageList = document.getElementById('categoriesManageList');
 
+
+
 // Month Names
 const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -344,20 +361,87 @@ function init() {
   applyTheme(settings.theme);
   updateSoundIcon();
   setupEventListeners();
+  setupPwa();
   populateCategorySelect();
   renderCategoryChips();
   renderColorSwatches();
   updateView();
 }
 
-// Cycling Themes List
+// Exactly balanced Themes List: 5 Dark Themes & 5 Light Themes
 const THEMES = [
-  { id: 'dark', label: 'Midnight', icon: '🌙' },
-  { id: 'oled', label: 'Midnight OLED', icon: '🖤' },
-  { id: 'light', label: 'Paper Light', icon: '☀️' },
-  { id: 'forest', label: 'Forest Sage', icon: '🌲' },
-  { id: 'ocean', label: 'Nordic Ocean', icon: '🌊' },
-  { id: 'sunset', label: 'Sunset Ember', icon: '🌅' }
+  // 5 Dark Themes
+  {
+    id: 'dark',
+    label: 'Midnight',
+    icon: '🌙',
+    mode: 'Dark',
+    colors: ['#0b0f19', '#111827', '#10b981', '#1e293b']
+  },
+  {
+    id: 'oled',
+    label: 'Midnight OLED',
+    icon: '🖤',
+    mode: 'Dark',
+    colors: ['#000000', '#0a0a0a', '#10b981', '#1e1e1e']
+  },
+  {
+    id: 'forest',
+    label: 'Forest Sage',
+    icon: '🌲',
+    mode: 'Dark',
+    colors: ['#06110a', '#0c1b12', '#10b981', '#193826']
+  },
+  {
+    id: 'ocean',
+    label: 'Nordic Ocean',
+    icon: '🌊',
+    mode: 'Dark',
+    colors: ['#060d17', '#0a1829', '#38bdf8', '#173252']
+  },
+  {
+    id: 'sunset',
+    label: 'Sunset Ember',
+    icon: '🌅',
+    mode: 'Dark',
+    colors: ['#140b10', '#1e1118', '#f43f5e', '#3a1c2b']
+  },
+  // 5 Light Themes
+  {
+    id: 'light',
+    label: 'Paper Light',
+    icon: '☀️',
+    mode: 'Light',
+    colors: ['#f8fafc', '#ffffff', '#10b981', '#cbd5e1']
+  },
+  {
+    id: 'latte',
+    label: 'Warm Latte',
+    icon: '☕',
+    mode: 'Light',
+    colors: ['#fbf8f3', '#ffffff', '#d97706', '#d4c5b3']
+  },
+  {
+    id: 'meadow',
+    label: 'Matcha Meadow',
+    icon: '🍃',
+    mode: 'Light',
+    colors: ['#f3f8f4', '#ffffff', '#16a34a', '#b2d2b5']
+  },
+  {
+    id: 'arctic',
+    label: 'Nordic Frost',
+    icon: '❄️',
+    mode: 'Light',
+    colors: ['#f1f6fc', '#ffffff', '#0284c7', '#a7ccef']
+  },
+  {
+    id: 'blossom',
+    label: 'Sakura Dawn',
+    icon: '🌸',
+    mode: 'Light',
+    colors: ['#fff5f7', '#ffffff', '#e11d48', '#ebb1c0']
+  }
 ];
 
 // Update Theme
@@ -366,6 +450,15 @@ function applyTheme(themeId) {
   document.documentElement.setAttribute('data-theme', matched.id);
   if (themeCycleIcon) themeCycleIcon.textContent = matched.icon;
   if (themeCycleLabel) themeCycleLabel.textContent = matched.label;
+
+  // Update browser & PWA theme-color meta
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta && matched.colors && matched.colors[0]) {
+    themeColorMeta.setAttribute('content', matched.colors[0]);
+  }
+
+  // Sync Theme Gallery cards active highlight if open
+  renderThemeGalleryCards();
 }
 
 function cycleTheme() {
@@ -376,7 +469,122 @@ function cycleTheme() {
   settings.theme = nextTheme.id;
   saveSettings(settings);
   applyTheme(nextTheme.id);
-  showToast(`Theme: ${nextTheme.label} ${nextTheme.icon}`, 'success');
+  showToast(`Theme: ${nextTheme.label} ${nextTheme.icon} (${nextTheme.mode})`, 'success');
+}
+
+// Theme Gallery Modal rendering & actions
+function renderThemeGalleryCards() {
+  if (!themeGalleryGrid) return;
+  const currentTheme = document.documentElement.getAttribute('data-theme') || settings.theme || 'dark';
+
+  themeGalleryGrid.innerHTML = THEMES.map(theme => {
+    const isActive = theme.id === currentTheme;
+    const isDark = theme.mode === 'Dark';
+    return `
+      <div class="theme-card ${isActive ? 'active' : ''}" data-theme-id="${theme.id}" role="button" tabindex="0" title="Switch to ${theme.label} (${theme.mode})">
+        <div class="theme-card-top">
+          <div class="theme-card-title-group">
+            <span class="theme-card-emoji">${theme.icon}</span>
+            <span class="theme-card-name">${theme.label}</span>
+          </div>
+          <span class="theme-card-badge ${isDark ? 'badge-dark' : 'badge-light'}">${theme.mode}</span>
+        </div>
+        ${isActive ? '<span class="theme-card-active-tag">✓ Active</span>' : ''}
+        <div class="theme-card-palette">
+          ${theme.colors.map(c => `<span class="palette-swatch" style="background-color: ${c}"></span>`).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openThemeGallery() {
+  renderThemeGalleryCards();
+  if (themeGalleryModal) themeGalleryModal.classList.remove('hidden');
+}
+
+function closeThemeGallery() {
+  if (themeGalleryModal) themeGalleryModal.classList.add('hidden');
+}
+
+// ==========================================
+// PWA INSTALLATION & SERVICE WORKER LOGIC
+// ==========================================
+let deferredInstallPrompt = null;
+
+function setupPwa() {
+  // 1. Register Service Worker with clean fallback
+  if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          console.log('[PWA] Service Worker registered:', reg.scope);
+        })
+        .catch(err => {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        });
+    });
+  }
+
+  // 2. Detect if already installed or running in standalone window
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandalone) {
+    if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+    if (proToolsInstallBtn) {
+      proToolsInstallBtn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        App Installed (Active)
+      `;
+      proToolsInstallBtn.disabled = true;
+      proToolsInstallBtn.style.opacity = '0.7';
+    }
+  } else {
+    // Show PWA install icon beside vol and edit
+    if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+      showToast('DailyHabits Pro app installed successfully! 🎉', 'success');
+    });
+  }
+}
+
+function triggerPwaInstall() {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        showToast('Installing DailyHabits Pro... 🚀', 'success');
+      }
+      deferredInstallPrompt = null;
+      if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+    });
+  } else {
+    // Show friendly modal instructions (iOS Safari or Desktop manual install)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (pwaIosInstructions) {
+      if (isIOS) {
+        pwaIosInstructions.classList.remove('hidden');
+      } else {
+        pwaIosInstructions.classList.add('hidden');
+      }
+    }
+    if (pwaDesktopInstructions) {
+      if (!isIOS) {
+        pwaDesktopInstructions.classList.remove('hidden');
+      } else {
+        pwaDesktopInstructions.classList.add('hidden');
+      }
+    }
+    if (pwaInstallModal) pwaInstallModal.classList.remove('hidden');
+  }
 }
 
 function updateSoundIcon() {
@@ -1824,7 +2032,13 @@ function setupEventListeners() {
   });
 
   // Theme Cycling & Sound
-  if (themeCycleBtn) themeCycleBtn.addEventListener('click', cycleTheme);
+  if (themeCycleBtn) {
+    themeCycleBtn.addEventListener('click', cycleTheme);
+    themeCycleBtn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      openThemeGallery();
+    });
+  }
   soundToggleBtn.addEventListener('click', () => {
     settings.soundEnabled = !settings.soundEnabled;
     saveSettings(settings);
@@ -1841,6 +2055,53 @@ function setupEventListeners() {
   document.addEventListener('click', () => {
     proToolsDropdown.classList.add('hidden');
   });
+
+  // PWA Install Listeners
+  if (pwaInstallBtn) pwaInstallBtn.addEventListener('click', triggerPwaInstall);
+  if (proToolsInstallBtn) {
+    proToolsInstallBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      proToolsDropdown.classList.add('hidden');
+      triggerPwaInstall();
+    });
+  }
+  if (closePwaModalBtn) closePwaModalBtn.addEventListener('click', () => pwaInstallModal.classList.add('hidden'));
+  if (closePwaModalFooterBtn) closePwaModalFooterBtn.addEventListener('click', () => pwaInstallModal.classList.add('hidden'));
+  if (pwaModalInstallActionBtn) {
+    pwaModalInstallActionBtn.addEventListener('click', () => {
+      if (deferredInstallPrompt) {
+        pwaInstallModal.classList.add('hidden');
+        triggerPwaInstall();
+      } else {
+        showToast('Click the install icon (⊕) in your browser address bar or menu', 'info');
+      }
+    });
+  }
+
+  // Theme Gallery Modal Listeners
+  if (proToolsThemesBtn) {
+    proToolsThemesBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      proToolsDropdown.classList.add('hidden');
+      openThemeGallery();
+    });
+  }
+  if (closeThemeGalleryBtn) closeThemeGalleryBtn.addEventListener('click', closeThemeGallery);
+  if (closeThemeGalleryFooterBtn) closeThemeGalleryFooterBtn.addEventListener('click', closeThemeGallery);
+  if (themeGalleryGrid) {
+    themeGalleryGrid.addEventListener('click', (e) => {
+      const card = e.target.closest('.theme-card');
+      if (!card) return;
+      const themeId = card.getAttribute('data-theme-id');
+      const selected = THEMES.find(t => t.id === themeId);
+      if (selected) {
+        settings.theme = selected.id;
+        saveSettings(settings);
+        applyTheme(selected.id);
+        showToast(`Theme: ${selected.label} ${selected.icon} (${selected.mode})`, 'success');
+      }
+    });
+  }
 
   // Brand logo & Month label click handlers (prevents deadclicks)
   const brandEl = document.querySelector('.brand');

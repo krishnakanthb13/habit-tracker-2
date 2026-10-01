@@ -14,12 +14,19 @@ habit-tracker-2/
 │   │   └── feature_request.md       # Structured feature suggestions
 │   └── pull_request_template.md     # Code contribution checklist
 ├── dist/                            # Production bundle output (Vite build)
+├── public/                          # Static PWA assets & Service Worker
+│   ├── apple-touch-icon.png         # iOS Safari home screen icon (180x180)
+│   ├── icon-192.png                 # Standard PWA app icon (192x192)
+│   ├── icon-512.png                 # High-res & maskable PWA app icon (512x512)
+│   ├── icon.svg                     # Crisp scalable vector brand icon
+│   ├── manifest.json                # W3C Web App Manifest (standalone PWA)
+│   └── sw.js                        # Native lightweight Service Worker (v2 cache)
 ├── src/                             # Application source code
 │   ├── analytics.js                 # Streaks, heatmaps, and metric algorithms
-│   ├── app.js                       # Main controller, state, and UI event orchestration
+│   ├── app.js                       # Main controller, state, PWA & theme orchestration
 │   ├── audio.js                     # Synthesized Web Audio API sound effects
 │   ├── storage.js                   # LocalStorage persistence, seeds, CSV/JSON exports
-│   └── style.css                    # Vanilla CSS design system (5 themes, sticky grid)
+│   └── style.css                    # Design system (10 balanced themes, sticky grid)
 ├── .gitignore                       # Git ignore rules for node_modules and builds
 ├── CODE_DOCUMENTATION.md            # Technical architecture and code guide
 ├── CODE_OF_CONDUCT.md               # Contributor Covenant v2.1 standard
@@ -31,14 +38,14 @@ habit-tracker-2/
 ├── LICENSE                          # GNU General Public License v3.0
 ├── package.json                     # Vite and canvas-confetti dependencies
 ├── README.md                        # Project overview, quickstart, and feature breakdown
-└── vercel.json                      # Vercel deployment, SPA rewrites, and security headers
+└── vercel.json                      # Vercel deployment, PWA headers, and security rules
 ```
 
 ---
 
 ## 2. High-Level Architecture
 
-DailyHabits Pro follows a **local-first, reactive modular MVC pattern** without the overhead of heavy virtual DOM frameworks:
+DailyHabits Pro follows a **local-first, reactive modular MVC pattern with native PWA offline capability**:
 
 ```mermaid
 graph TD
@@ -46,15 +53,18 @@ graph TD
     B -->|Query & Mutate| C[src/storage.js LocalStorage Engine]
     B -->|Calculate Metrics| D[src/analytics.js Analytics Engine]
     B -->|Audio Feedback| E[src/audio.js Web Audio Synthesizer]
+    B -->|Lifecycle & Install| H[public/sw.js & manifest.json PWA Engine]
     B -->|DOM Re-render| A
     C -->|Persist JSON| F[(Browser LocalStorage)]
     B -->|Export CSV / JSON| G[User File Downloads]
+    H -->|Precache & Fallback| I[(CacheStorage v2)]
 ```
 
 - **Model Layer (`storage.js`)**: Encapsulates all interactions with browser `localStorage`. Exposes pure functions for loading, saving, seeding, importing, resetting, and exporting data as CSV and JSON.
 - **Computation Layer (`analytics.js`)**: Computes real-time habit analytics (current/longest streaks, freeze-day allowances, monthly completion rates, 365-day heatmaps, day-of-week distributions).
 - **Audio Feedback Layer (`audio.js`)**: Real-time sound generation using the native Web Audio API oscillators and gain envelopes with zero audio asset downloads.
-- **Controller & View Layer (`app.js` + `style.css` + `index.html`)**: Manages UI tabs, modal lifecycle, theme cycling, table DOM rendering, and user action confirmations.
+- **Controller & View Layer (`app.js` + `style.css` + `index.html`)**: Manages UI tabs, modal lifecycle, 10-theme cycling, Theme Gallery cards, table DOM rendering, and user action confirmations.
+- **PWA Service Worker Layer (`sw.js` + `manifest.json`)**: Precaches the app shell, intercepts network requests with a Stale-While-Revalidate caching strategy, and enables standalone desktop/mobile installation.
 
 ---
 
@@ -99,7 +109,13 @@ graph TD
 | `showConfirmation(options)` | `options: Object` | Promise-based custom modal for confirmations (`title`, `message`, `icon`, `confirmText`, `confirmType`). |
 | `showToast(message, type, duration, action)` | `message: String, type?: String, duration?: Number, action?: Object` | Displays animated toast notifications (`success`, `warn`, `error`) with optional interactive 1-click `action` ({ text, onClick }) for instant Undo. |
 | `triggerCelebrationConfetti(options)` | `options?: Object` | Resilient confetti helper supporting both browser global (`window.confetti`) and bundlers without halting execution in unbundled environments. |
-| `cycleTheme()` | none | Cycles between 6 curated themes (`dark`, `oled`, `light`, `forest`, `ocean`, `sunset`). |
+| `applyTheme(themeId)` | `themeId: String` | Applies theme attribute to document root `[data-theme]`, updates header label/icon, dynamically synchronizes `<meta name="theme-color">`, and updates Theme Gallery active state. |
+| `cycleTheme()` | none | Cycles sequentially through all 10 curated themes (5 Dark & 5 Light) with toast feedback. |
+| `renderThemeGalleryCards()` | none | Renders interactive preview cards for all 10 themes with color swatches, mode badges, and active checkmarks. |
+| `openThemeGallery()` | none | Opens the Theme Gallery modal with current active theme highlighted. |
+| `closeThemeGallery()` | none | Closes the Theme Gallery modal. |
+| `setupPwa()` | none | Registers Service Worker (`sw.js`), listens for `beforeinstallprompt` / `appinstalled`, and configures standalone window mode display. |
+| `triggerPwaInstall()` | none | Triggers native browser install prompt or presents guided installation modal (e.g. for iOS Safari). |
 | `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers, archived badges, and dynamic unarchive row buttons. |
 | `openQuickNoteModal(date, habitId, noteId)` | `date?: String, habitId?: String, noteId?: String` | Opens daily reflection dialog pre-populated for given date/habit with mood chips, non-overflowing titles, and preserved archived tags. |
 | `closeQuickNoteModal()` | none | Closes reflection modal and resets text inputs. |
@@ -118,7 +134,34 @@ graph TD
 
 ---
 
-## 4. Data Flow Architecture
+## 4. PWA & Service Worker Offline Architecture
+
+The Progressive Web App implementation transforms DailyHabits Pro into a standalone, installable desktop and mobile application without bloating the repository with third-party wrappers:
+
+```mermaid
+graph TD
+    UserBrowser[User Browser / PWA Window] -->|Fetch Request| SW[public/sw.js Service Worker]
+    SW -->|HTML Navigation Mode| NetFirst{Network Available?}
+    NetFirst -->|Yes| OnlineFetch[Fetch fresh index.html]
+    NetFirst -->|No| CacheFall[Return cached index.html]
+    SW -->|Assets: CSS, JS, PNG, SVG| SWR[Stale-While-Revalidate]
+    SWR -->|Immediate| ReturnCache[Return from CacheStorage v2]
+    SWR -.->|Background Async| UpdateCache[Fetch & update CacheStorage]
+```
+
+- **Manifest Configuration (`public/manifest.json`)**: Configured with `display: "standalone"`, `display_override: ["window-controls-overlay", "standalone"]`, shortcuts to Jump to Today, and SVG/PNG icon sets.
+- **Cache Strategy**:
+  - **Navigation (`request.mode === 'navigate'`)**: Network-first with instant fallback to cached `./index.html` to guarantee offline launch.
+  - **Static Shell Assets**: Stale-While-Revalidate caching pattern for instantaneous UI startup under 50ms.
+  - **Cache Versioning**: Uses namespaced `dailyhabits-pro-v2` cache keys with automatic purging of legacy cache stores during the `activate` event.
+- **Install Flow**:
+  - Listens for `beforeinstallprompt`, stores the event in `deferredInstallPrompt`, and unhides the header `#pwaInstallBtn`.
+  - When installed, `appinstalled` resets prompt state and displays a celebration toast.
+  - Detects standalone mode via `(display-mode: standalone)` and `window.navigator.standalone` to streamline UI actions.
+
+---
+
+## 5. Data Flow Architecture
 
 ```mermaid
 sequenceDiagram
@@ -144,7 +187,7 @@ sequenceDiagram
 
 ---
 
-## 5. Dependencies
+## 6. Dependencies
 
 | Package | Version | Type | Purpose |
 |---|---|---|---|
@@ -153,18 +196,20 @@ sequenceDiagram
 
 ---
 
-## 6. Execution Lifecycle
+## 7. Execution Lifecycle
 
 1. **Bootstrap (`index.html` -> `src/app.js`)**:
    - `init()` is invoked on script load.
    - `loadAppData()` loads existing state from `localStorage` or initial seeds.
-   - `applyTheme(settings.theme)` applies theme to document root `[data-theme]`.
-   - Event listeners bound for month navigation, view tabs, shortcuts, and modals.
+   - `applyTheme(settings.theme)` applies theme to document root `[data-theme]` and syncs `<meta name="theme-color">`.
+   - `setupPwa()` registers `sw.js` and hooks PWA install events.
+   - Event listeners bound for month navigation, view tabs, shortcuts, Theme Gallery, PWA install actions, and modals.
 2. **Runtime Interactions**:
    - User inputs trigger localized state mutations, audio synthesis, and visual feedback toasts.
    - Non-disruptive toast alerts notify users on habit creation, updates, category changes, sound toggling, goal milestones, and data exports.
    - State changes immediately call `saveAppData()`.
    - Grid rendering uses structured `.habit-category-tag` pills with `.habit-cat-indicator` rounded color bars and cohesive spacing next to quantitative metric tags.
 3. **Offline Reliability**:
-   - No external APIs or servers are queried during runtime.
-   - 100% of data remains on the user's device.
+   - The Service Worker caches application assets into `dailyhabits-pro-v2`.
+   - All habit tracking, streaks, reflections, and exports operate 100% offline without network requests.
+   - 100% of data remains securely stored on the user's device.

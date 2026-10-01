@@ -5,10 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DailyHabits Pro - Lightweight Minimalist Habit Tracker</title>
   <meta name="description" content="Ultra-lightweight, beautiful daily habit tracker inspired by DailyHabits with all Pro features unlocked. Unlimited habits, analytics, streaks, journaling, and offline privacy.">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DailyHabits">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+  <link rel="alternate icon" type="image/png" href="./icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./src/style.css?v=0.0.10">
+  <link rel="stylesheet" href="./src/style.css?v=0.0.11">
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2310b981'><circle cx='12' cy='12' r='10'/><path d='m9 12 2 2 4-4' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>">
   <!-- Canvas Confetti Library (Supports both standalone browser and bundled environments) -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
@@ -94,10 +104,19 @@
             <svg id="soundIconOff" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
           </button>
 
+          <!-- PWA Install (Icon Only beside vol & edit) -->
+          <button id="pwaInstallBtn" class="btn-icon-ghost" title="Install DailyHabits App (PWA)" aria-label="Install App">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </button>
+
           <!-- Theme Cycling Button -->
-          <button id="themeCycleBtn" class="btn-theme-cycle" title="Click to Cycle Theme (Dark, Light, Forest, Ocean, Sunset)" aria-label="Cycle Theme">
+          <button id="themeCycleBtn" class="btn-theme-cycle" title="Click to Cycle Theme (5 Light & 5 Dark Themes)" aria-label="Cycle Theme">
             <span id="themeCycleIcon" class="theme-cycle-icon">🌙</span>
-            <span id="themeCycleLabel" class="theme-label-text">Dark</span>
+            <span id="themeCycleLabel" class="theme-label-text">Midnight</span>
           </button>
 
           <!-- Pro Tools Dropdown (Utilities: Print, Shortcuts, Quick Backups) -->
@@ -106,7 +125,16 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
             <div id="proToolsDropdown" class="dropdown-menu hidden">
-              <div class="dropdown-header">Quick Tools & Export</div>
+              <div class="dropdown-header">Quick Tools & Themes</div>
+              <button class="dropdown-item" id="proToolsInstallBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Install App (PWA)
+              </button>
+              <button class="dropdown-item" id="proToolsThemesBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10a10 10 0 0 1-10-10C2 6.48 6.48 2 12 2z"/><path d="M12 2v20"/></svg>
+                Theme Gallery
+              </button>
+              <div class="dropdown-divider"></div>
               <button class="dropdown-item" id="proToolsArchivedBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
                 Archived Habits (<span id="proToolsArchivedCount">0</span>)
@@ -1096,6 +1124,96 @@
       </div>
     </div>
 
+    <!-- MODAL: PWA INSTALLABLE OPTION -->
+    <div id="pwaInstallModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="pwaModalTitle">
+      <div class="modal-dialog modal-dialog-md">
+        <div class="modal-header">
+          <div>
+            <h2 id="pwaModalTitle" class="modal-heading">Install DailyHabits App</h2>
+            <p class="modal-subheading">Ultra-fast, distraction-free habit tracking right on your desktop or home screen</p>
+          </div>
+          <button type="button" id="closePwaModalBtn" class="modal-close-btn" aria-label="Close modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="pwa-modal-icon-wrap">
+          <img src="./icon-192.png" alt="DailyHabits Logo" width="48" height="48">
+        </div>
+
+        <div class="pwa-benefits-list">
+          <div class="pwa-benefit-item">
+            <span class="pwa-benefit-icon">⚡</span>
+            <div>
+              <strong>Instant Launch & Window Freedom</strong>
+              <p>Opens immediately in its own standalone window without browser tabs or address bar clutter.</p>
+            </div>
+          </div>
+          <div class="pwa-benefit-item">
+            <span class="pwa-benefit-icon">🔒</span>
+            <div>
+              <strong>100% Offline & Private</strong>
+              <p>All habits, logs, streaks, and reflections remain stored on your device with full offline support.</p>
+            </div>
+          </div>
+          <div class="pwa-benefit-item">
+            <span class="pwa-benefit-icon">🪶</span>
+            <div>
+              <strong>Featherweight Performance</strong>
+              <p>Under 100 KB total size. Consumes practically zero battery and disk storage compared to bulky native apps.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="pwaIosInstructions" class="pwa-ios-instructions hidden">
+          <strong>Install on iPhone / iPad (Safari):</strong>
+          <ol>
+            <li>Tap the <strong>Share</strong> button <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> in Safari.</li>
+            <li>Scroll down and tap <strong>Add to Home Screen</strong> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>.</li>
+            <li>Tap <strong>Add</strong> in the top-right corner!</li>
+          </ol>
+        </div>
+
+        <div id="pwaDesktopInstructions" class="pwa-ios-instructions hidden" style="border-left-color: var(--primary);">
+          <strong>Install on Desktop (Chrome / Edge / Brave):</strong>
+          <p style="margin: 6px 0 0 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5;">
+            Click the <strong>Install</strong> icon (<span style="color: var(--primary); font-weight: 700;">⊕</span> or <span style="font-weight: 700;">💻</span>) directly inside your browser's address bar at the top right, or click browser menu (<strong>⋮</strong>) &rarr; <em>"Install DailyHabits..."</em>
+          </p>
+        </div>
+
+        <div class="modal-footer" style="margin-top: 20px;">
+          <button type="button" id="closePwaModalFooterBtn" class="btn-secondary-ghost">Close</button>
+          <button type="button" id="pwaModalInstallActionBtn" class="btn-primary-action">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Install Now</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: THEME GALLERY (5 Light & 5 Dark Themes) -->
+    <div id="themeGalleryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="themeGalleryTitle">
+      <div class="modal-dialog modal-dialog-lg">
+        <div class="modal-header">
+          <div>
+            <h2 id="themeGalleryTitle" class="modal-heading">Theme Gallery</h2>
+            <p class="modal-subheading">10 curated color schemes — perfectly balanced with 5 Dark and 5 Light themes</p>
+          </div>
+          <button type="button" id="closeThemeGalleryBtn" class="modal-close-btn" aria-label="Close modal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+
+        <div class="theme-gallery-grid" id="themeGalleryGrid">
+          <!-- Dynamically populated theme cards via JS -->
+        </div>
+
+        <div class="modal-footer" style="margin-top: 24px;">
+          <button type="button" id="closeThemeGalleryFooterBtn" class="btn-secondary-ghost">Done</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MODAL: CONFIRMATION DIALOG -->
     <div id="confirmModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
       <div class="modal-dialog modal-dialog-sm confirm-dialog">
@@ -1122,6 +1240,6 @@
   </div>
 
   <!-- Main JavaScript bundle -->
-  <script type="module" src="./src/app.js?v=0.0.10"></script>
+  <script type="module" src="./src/app.js?v=0.0.11"></script>
 </body>
 </html>

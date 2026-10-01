@@ -91,20 +91,39 @@ npx vercel
      - ⚠️ **Reset Data**: Protected Danger Zone to reset to starter demo routines or wipe data to a blank canvas.
    - **100% Offline & Local**: Your routine data never leaves your browser origin.
    - **Quick Pro Tools Menu**: 1-click downloads for Month CSV, Lifetime CSV, and JSON Backups without opening full modals.
-9. **6 Cycling Color Themes & Tactile Audio**:
-   - One-click cycling between 6 curated themes: **Midnight Dark 🌙**, **Midnight OLED Pure Black 🖤**, **Crisp Paper Light ☀️**, **Forest Sage 🌲**, **Nordic Ocean 🌊**, and **Sunset Ember 🌅**.
-   - Synthesized pop sounds and celebration chords on milestone completions via the native Web Audio API.
-   - Resilient celebration confetti burst upon completing monthly goals that works out-of-the-box across both bundled and standalone static environments.
-10. **Custom Category Management Studio (🏷️)**:
+9. **10 Curated Color Themes (Symmetric 5 Light & 5 Dark)**:
+   - **Perfect 50/50 Balance**: Designed for both daytime clarity and midnight focus with 5 Dark and 5 Light counterparts:
+     - 🌙 **Midnight (Dark)**: Classic deep slate with emerald green accent.
+     - 🖤 **Midnight OLED (Dark)**: Pure `#000000` AMOLED pitch black.
+     - 🌲 **Forest Sage (Dark)**: Deep botanical pine with emerald highlights.
+     - 🌊 **Nordic Ocean (Dark)**: Deep oceanic fjord with crisp cerulean blue.
+     - 🌅 **Sunset Ember (Dark)**: Rich twilight wine with vibrant rose ember.
+     - ☀️ **Paper Light (Light)**: Clean, editorial paper white with emerald accents.
+     - ☕ **Warm Latte (Light)**: Soothing morning parchment with roasted caramel & amber.
+     - 🍃 **Matcha Meadow (Light)**: Fresh herbal sage cream with botanical green highlights.
+     - ❄️ **Nordic Frost (Light)**: Crisp arctic porcelain with crystalline polar blue.
+     - 🌸 **Sakura Dawn (Light)**: Soft petal blush with vibrant cherry blossom coral.
+   - **One-Click Theme Cycling**: Cycle swiftly through all 10 themes with the header theme button.
+   - **Visual Theme Gallery Modal**: Open from **Pro Tools (`⋯`) → Theme Gallery** (or right-click the theme button) to browse interactive color swatches and switch themes in 1 click.
+   - **Adaptive Mobile Status Bar**: Dynamically synchronizes `<meta name="theme-color">` to match your active palette.
+   - **Tactile Sound & Celebration**: Synthesized audio feedback for checks, streak freeze shields, and milestone fanfare via the Web Audio API, paired with resilient goal-completion confetti.
+10. **Installable Progressive Web App (PWA) & Offline Freedom**:
+    - **Native Desktop & Mobile Experience**: Install directly to your Windows/macOS/Linux taskbar or dock, and iOS/Android home screen.
+    - **Standalone Window Mode**: Launches immediately in a dedicated, distraction-free app window without browser tabs or address bar clutter.
+    - **100% Offline Resilience**: Powered by an ultra-lightweight Service Worker with Stale-While-Revalidate caching—track routines, view heatmaps, and journal notes anywhere with zero internet connection.
+    - **One-Click Install Header Action**: Automatically displays a stylish "Install App" pill button when installable, plus a permanent "Install App (PWA)" option in Pro Tools.
+    - **iOS Safari Support**: Dedicated install modal with step-by-step visual instructions (*Share → "Add to Home Screen"*).
+    - **Featherweight Size**: Entire app bundle is under ~45 kB gzipped with zero bloated dependencies.
+11. **Custom Category Management Studio (🏷️)**:
     - **Full Domain Control**: Create, rename, recolor, and organize custom life categories (Health & Body, Focus & Work, Mind & Peace, Knowledge, Fitness & Sport, etc.).
     - **Safe Deletion & Auto-Reassignment**: Deleting a category prompts a safe selection modal allowing you to reassign all associated habits to another category or General, ensuring no habit is ever orphaned.
     - **Themed Custom Scrollbars**: Dedicated category list with theme-synchronized custom scrollbars across all dark and light palettes.
-11. **Comprehensive Toast Notification & Feedback System (🍞)**:
+12. **Comprehensive Toast Notification & Feedback System (🍞)**:
     - Non-intrusive animated feedback across key application actions: daily 100% routine completion celebration, routine creation & editing, metric updates, sound feedback muting/unmuting, streak freeze shields, goal smashed celebrations, jumping to today (<kbd>T</kbd>), and JSON/CSV data operations.
     - Interactive 1-click **Undo** toasts for instant reversal of archiving or routine restorations.
-12. **Dedicated "How to Use" User Manual & Guide**:
+13. **Dedicated "How to Use" User Manual & Guide**:
     - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze, numeric logging, category studio, reflection journaling, habit archive/restore vault, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
-13. **In-App Confirmation Dialogs & Non-Destructive Guards**:
+14. **In-App Confirmation Dialogs & Non-Destructive Guards**:
     - Custom non-blocking modal dialogs protect against accidental data wiping, habit deletion, or reflection loss with clear warning previews and <kbd>Esc</kbd> dismissal.
 
 ---
