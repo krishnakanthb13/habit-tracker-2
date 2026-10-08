@@ -27,6 +27,9 @@ habit-tracker-2/
 │   ├── audio.js                     # Synthesized Web Audio API sound effects
 │   ├── storage.js                   # LocalStorage persistence, seeds, CSV/JSON exports
 │   └── style.css                    # Design system (10 balanced themes, sticky grid)
+├── tests/                           # Automated unit & regression test suite
+│   ├── analytics.test.js            # Streak rules, freeze preserves, and heatmap tests
+│   └── storage.test.js              # Night Owl shifts, settings, and repair tests
 ├── .gitignore                       # Git ignore rules for node_modules and builds
 ├── CODE_DOCUMENTATION.md            # Technical architecture and code guide
 ├── CODE_OF_CONDUCT.md               # Contributor Covenant v2.1 standard
@@ -75,8 +78,11 @@ graph TD
 |---|---|---|
 | `loadAppData()` | none | Loads saved data from `dailyhabits_pro_data_v1` or generates starter demo habits if first launch. |
 | `saveAppData(data)` | `data: Object` | Serializes application state to `localStorage`. |
-| `loadSettings()` | none | Retrieves user configuration (theme, audio, confetti, active category). |
+| `loadSettings()` | none | Retrieves user configuration (`theme`, `enableConfetti`, `soundEnabled`, `nightOwlMode`, `skipPreservesStreak`, `compactMode`, `autoScrollToday`, `activeCategory`). |
 | `saveSettings(settings)` | `settings: Object` | Persists user settings to `dailyhabits_settings_v1`. |
+| `getEffectiveDate(settings, baseDate)` | `settings: Object, baseDate?: Date` | Returns the effective tracking date respecting Night Owl mode (shifting times before 03:00 AM to the prior calendar day). |
+| `getEffectiveTodayKey(settings)` | `settings: Object` | Returns the formatted `YYYY-MM-DD` date key for today under Night Owl rules. |
+| `validateAndRepairStorage()` | none | Inspects `localStorage` integrity, repairs malformed structures or missing keys, and returns a detailed diagnostics report for the Storage Doctor. |
 | `formatDateKey(y, m, d)` | `y: Number, m: Number, d: Number` | Converts year, 0-indexed month, and day to `YYYY-MM-DD` string. |
 | `parseDateKey(key)` | `key: String` | Parses `YYYY-MM-DD` string into `{ year, month, day }`. |
 | `exportToJSON(data)` | `data: Object` | Formats data into a formatted JSON string for backup downloads. |
@@ -89,7 +95,7 @@ graph TD
 ### `src/analytics.js`
 | Function | Parameters | Description |
 |---|---|---|
-| `calculateStreak(habit)` | `habit: Object` | Calculates current streak, longest streak, and total completed days, respecting `skipped` (Streak Freeze) days. |
+| `calculateStreak(habit, options)` | `habit: Object, options?: Object` | Calculates current streak, longest streak, and total completed days, respecting `skipped` days according to `skipPreservesStreak` rule. |
 | `calculateMonthStats(habits, y, m)` | `habits: Array, y: Number, m: Number` | Calculates total completed days, completion percentage, and goals met for a given month. |
 | `calculateDayOfWeekBreakdown(habits)` | `habits: Array` | Aggregates check-ins across Monday through Sunday. |
 | `generateAnnualHeatmap(habits, y, filterHabitId)` | `habits: Array, y: Number, filterHabitId?: String` | Generates a 365-day map with level intensity (0-4) for the consistency matrix, supporting optional routine filtering. |
@@ -111,9 +117,14 @@ graph TD
 | `triggerCelebrationConfetti(options)` | `options?: Object` | Resilient confetti helper supporting both browser global (`window.confetti`) and bundlers without halting execution in unbundled environments. |
 | `applyTheme(themeId)` | `themeId: String` | Applies theme attribute to document root `[data-theme]`, updates header label/icon, dynamically synchronizes `<meta name="theme-color">`, and updates Theme Gallery active state. |
 | `cycleTheme()` | none | Cycles sequentially through all 10 curated themes (5 Dark & 5 Light) with toast feedback. |
-| `renderThemeGalleryCards()` | none | Renders interactive preview cards for all 10 themes with color swatches, mode badges, and active checkmarks. |
+| `renderThemeGalleryCards()` | none | Renders interactive preview cards for all 10 themes with color swatches, high-contrast mode badges, and active checkmarks. |
 | `openThemeGallery()` | none | Opens the Theme Gallery modal with current active theme highlighted. |
 | `closeThemeGallery()` | none | Closes the Theme Gallery modal. |
+| `applySettings(settings)` | `settings: Object` | Applies user settings (compact table mode class, sound state, theme, auto-scroll). |
+| `openSettingsModal()` | none | Opens the Preferences & Settings modal (<kbd>S</kbd>) and updates Storage Doctor diagnostics. |
+| `closeSettingsModal()` | none | Closes the Preferences & Settings modal. |
+| `renderStorageDoctor()` | none | Computes real-time storage statistics (items, bytes, quota, health) for the Storage Doctor UI. |
+| `setView(viewName)` | `viewName: String` | Switches active view tab and dynamically scopes `#subHeaderBar` categories visibility to the `grid` view. |
 | `setupPwa()` | none | Registers Service Worker (`sw.js`), listens for `beforeinstallprompt` / `appinstalled`, and configures standalone window mode display. |
 | `triggerPwaInstall()` | none | Triggers native browser install prompt or presents guided installation modal (e.g. for iOS Safari). |
 | `renderHabitGrid()` | none | Renders the high-density spreadsheet grid with sticky headers, archived badges, and dynamic unarchive row buttons. |
@@ -213,3 +224,21 @@ sequenceDiagram
    - The Service Worker caches application assets into `dailyhabits-pro-v2`.
    - All habit tracking, streaks, reflections, and exports operate 100% offline without network requests.
    - 100% of data remains securely stored on the user's device.
+
+---
+
+## 8. Automated Testing Architecture
+
+DailyHabits Pro features a zero-overhead, regression-safe test harness built directly into Node.js (`node --test`), requiring zero external test runner dependencies (no Jest, Vitest, or Mocha required for CI/CD):
+
+- **Test Suite Command**: `npm test`
+- **Modules Covered**:
+  - `tests/analytics.test.js`:
+    - Consecutive streak incrementation and today-yesterday fallback logic.
+    - Streak Freeze preservation rules (`skipPreservesStreak: true` vs `strict: false`).
+    - Quantitative/numeric habit completions calculation.
+    - Safe error boundaries for null/empty habits and out-of-range dates.
+  - `tests/storage.test.js`:
+    - Default settings integrity and round-trip persistence in `localStorage`.
+    - Night Owl circadian date algorithm across normal daytime (14:00), pre-cutoff late night (01:30 AM), exact cutoff boundary (03:00 AM), and new year transitions (Jan 1 01:00 AM -> Dec 31).
+    - `validateAndRepairStorage()` corruption recovery and self-healing diagnostics.

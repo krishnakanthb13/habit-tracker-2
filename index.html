@@ -191,7 +191,7 @@
     </header>
 
     <!-- Sub-header Category & Quick Filter Toolbar -->
-    <div class="sub-header-bar">
+    <div class="sub-header-bar" id="subHeaderBar">
       <div class="categories-toolbar">
         <div class="categories-scroller" id="categoryChips">
           <!-- Rendered dynamically -->
@@ -551,9 +551,18 @@
               <div class="guide-feature-card">
                 <div class="feature-card-icon">🎨</div>
                 <div class="feature-card-body">
-                  <h4>Theme Cycling</h4>
-                  <p>Click the theme button in the top right to cycle through 5 curated aesthetic color palettes: <strong>Midnight OLED</strong>, <strong>Paper Light</strong>, <strong>Forest Sage</strong>, <strong>Nordic Ocean</strong>, and <strong>Sunset Ember</strong>.</p>
-                  <span class="feature-pill-tag">5 Color Themes</span>
+                  <h4>10 Curated Themes & Theme Gallery</h4>
+                  <p>Browse 10 balanced palettes (5 Light & 5 Dark) with high-contrast cards and swatch bars. Click the header theme button to cycle quickly, or open the Theme Gallery modal via Pro Tools (or right-click the theme button).</p>
+                  <span class="feature-pill-tag">10 Curated Palettes</span>
+                </div>
+              </div>
+
+              <div class="guide-feature-card">
+                <div class="feature-card-icon">⚙️</div>
+                <div class="feature-card-body">
+                  <h4>Preferences & Toggles Hub (<kbd>S</kbd>)</h4>
+                  <p>Customize your tracking experience: toggle celebration confetti, sound synthesis, Night Owl mode (3 AM cutoff for late routines), streak freeze preservation, compact table mode, and run Storage Doctor integrity diagnostics.</p>
+                  <span class="feature-pill-tag">Hotkey: S</span>
                 </div>
               </div>
             </div>
@@ -1376,11 +1385,14 @@
 
     <!-- MODAL: THEME GALLERY (5 Light & 5 Dark Themes) -->
     <div id="themeGalleryModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="themeGalleryTitle">
-      <div class="modal-dialog modal-dialog-lg">
+      <div class="modal-dialog modal-dialog-lg theme-gallery-dialog">
         <div class="modal-header">
-          <div>
-            <h2 id="themeGalleryTitle" class="modal-heading">Theme Gallery</h2>
-            <p class="modal-subheading">10 curated color schemes — perfectly balanced with 5 Dark and 5 Light themes</p>
+          <div class="theme-gallery-header-info">
+            <div class="theme-gallery-title-row">
+              <span class="theme-gallery-pill">PALETTES</span>
+              <h2 id="themeGalleryTitle" class="modal-heading">Theme Gallery</h2>
+            </div>
+            <p class="modal-subheading">10 curated color schemes — 5 deep dark & 5 crisp light themes.</p>
           </div>
           <button type="button" id="closeThemeGalleryBtn" class="modal-close-btn" aria-label="Close modal">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -1391,8 +1403,9 @@
           <!-- Dynamically populated theme cards via JS -->
         </div>
 
-        <div class="modal-footer" style="margin-top: 24px;">
-          <button type="button" id="closeThemeGalleryFooterBtn" class="btn-secondary-ghost">Done</button>
+        <div class="modal-footer theme-gallery-footer">
+          <span class="theme-gallery-hint">💡 Click any card to apply instantly</span>
+          <button type="button" id="closeThemeGalleryFooterBtn" class="btn-primary-action">Done</button>
         </div>
       </div>
     </div>

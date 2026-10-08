@@ -88,6 +88,30 @@ Traditional productivity software forces a painful dilemma: either stay trapped 
 - **Zero-Bloat Featherweight Footprint**: The entire application bundle (scripts, styles, icons, sound synthesizers, and service worker) weighs **under ~45 kB gzipped**—roughly 1/3,000th the size of an average desktop electron habit app.
 - **True Offline Autonomy**: Habits, streak calculations, journal feeds, and JSON exports remain fully functional on an airplane, subway, or off-grid cabin.
 
+### XII. Biological Time vs. Astronomical Midnight (Night Owl Mode 🦉)
+Behavior happens across subjective, lived biological days—not rigid astronomical midnights:
+- For night-shift workers, late-night writers, and nocturnal developers, finishing a routine at 1:00 AM belongs emotionally and physiologically to the day they just lived, not the next calendar morning.
+- Hard calendar midnights punish nocturnal users by breaking streaks or prematurely marking today's column while yesterday remains blank.
+- **The 3:00 AM Circadian Cutoff**: Night Owl mode shifts pre-dawn hours (00:00 to 02:59) back to the prior calendar date, eliminating demoralizing streak fractures while keeping daylight dates completely standard.
+
+### XIII. Sensory Sovereignty (Granular Behavioral Toggles)
+Dopamine loops are deeply personal:
+- Some users thrive on gamified fanfare (confetti blasts, synthesized arpeggios, pulsing animations).
+- Others seek quiet, distraction-free stoicism (silent ticks, compact grid spacing, neutral interactions).
+- Instead of imposing a rigid aesthetic philosophy, the **Preferences Hub (<kbd>S</kbd>)** empowers users with independent toggles for confetti, sound synthesis, auto-scroll, and density, honoring each individual's cognitive rhythm.
+
+### XIV. Spatial Hierarchy & Context-Aware Controls (Scoped Filtering)
+Interface clarity requires that controls exist only where they are actionable:
+- The sub-header category toolbar serves exclusively to filter and organize routines on the spreadsheet grid.
+- When users transition to **Analytics**, **Journal reflections**, or the **User Manual**, the category toolbar becomes spatial clutter.
+- Automatically scoping category controls strictly to the Habit Grid view ensures that deep reflection and analytical study receive undivided visual focus.
+
+### XV. Local-First Transparency & Self-Healing (Storage Doctor 🩺)
+Local-first software must never be a mysterious black box:
+- Without cloud servers to perform database migrations or check data health, users can feel anxiety regarding local storage quotas and silent corruption.
+- **Storage Doctor Diagnostics**: Directly inspects `localStorage` to surface exact byte footprints, habit counts, reflection tallies, and estimated quota utilization.
+- **Self-Healing Integrity Validator**: Scans for corrupted JSON structures, missing arrays, or orphaned references, non-destructively repairing data health in 1 click without needing cloud support.
+
 ---
 
 ## 4. Target Audience & Use Cases

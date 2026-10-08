@@ -125,6 +125,37 @@ npx vercel
     - Comprehensive in-app documentation with a 4-step quickstart, deep-dives on Streak Freeze, numeric logging, category studio, reflection journaling, habit archive/restore vault, keyboard cheat sheets, and behavioral psychology strategies (Two-Day Rule, Habit Stacking).
 14. **In-App Confirmation Dialogs & Non-Destructive Guards**:
     - Custom non-blocking modal dialogs protect against accidental data wiping, habit deletion, or reflection loss with clear warning previews and <kbd>Esc</kbd> dismissal.
+15. **⚙️ Preferences, Settings & Toggles Hub (<kbd>S</kbd>)**:
+    - **One-Click Access**: Quick-open via the gear icon in the top header, the Pro Tools menu, or by pressing <kbd>S</kbd>.
+    - **Toggle Confetti Celebration**: Turn on/off festive canvas confetti bursts when achieving monthly goals.
+    - **Master Sound Control**: Instant toggle for synthesized Web Audio sound feedback.
+    - **🦉 Night Owl Mode**: Prevents midnight streak breaks for late-night routines! When active, habit check-ins before 3:00 AM count towards the previous day you actually experienced.
+    - **🛡️ Streak Freeze Preservation Rule**: Choose whether skipped days preserve consecutive streak momentum (default: true) or enforce strict daily execution.
+    - **📏 Compact Mode**: Maximizes screen real-estate with tighter spreadsheet cell and row padding—ideal for laptop screens.
+    - **🎯 Auto-Scroll to Today**: Automatically scrolls the spreadsheet grid horizontally to today's date column upon launch.
+    - **🩺 Storage Doctor & Health Diagnostics**: Live health inspection displaying item counts (active habits, archived routines, journal reflections, categories), total bytes consumed in `localStorage`, quota percentages, and a 1-click **Check Integrity** repair utility.
+16. **🎯 Focused Navigation & Context-Scoped Categories Bar**:
+    - The top category filtering and stats toolbar is **exclusively active in the Habit Grid view**, keeping the Analytics, Journal, and Guide tabs distraction-free and spacious.
+    - The `PRO UNLOCKED` badge sits neatly as an elegant micro-pill directly below `DailyHabits` for a compact, balanced brand header.
+17. **🧪 Automated Unit & Regression Test Suite**:
+    - Zero-dependency automated test suite powered by Node.js's built-in test runner (`node:test` and `node:assert/strict`).
+    - 17 comprehensive unit and regression tests verifying streak calculations, Night Owl shifts, freeze day rules, settings round-trips, and storage self-healing.
+
+---
+
+## 📖 How to Use DailyHabits Pro
+
+1. **Building Habits**: Click **+ New Habit** (or press <kbd>N</kbd>). Configure frequency (Daily, Weekdays, or Numeric target) and assign an optional category.
+2. **Checking Off Routines**: Click any day cell in the spreadsheet grid to mark completion. Sound synthesis confirms your action, and reaching your monthly goal triggers celebration fanfare.
+3. **Freezing Streaks**: If you're sick, traveling, or resting, **Alt-click** any cell to place a **Streak Freeze shield (🛡️)**. This preserves your consecutive streak without breaking your chain.
+4. **Logging Daily Thoughts**: **Right-click** any day cell or press <kbd>J</kbd> to record a quick daily reflection with mood tags and writing prompts.
+5. **Managing Life Domains**: Click **Categories** on the top filter bar to create, rename, or recolor custom categories with real-time reactive updates.
+6. **Switching Views**: Use the navigation tabs or hotkeys:
+   - <kbd>1</kbd>: **Habit Grid** (with top category filter bar)
+   - <kbd>2</kbd>: **Analytics & Streaks** (annual heatmap, category effort distribution, consistency breakdown)
+   - <kbd>3</kbd>: **Journal & Notes** (searchable reflection cards and mood feed)
+   - <kbd>4</kbd>: **User Guide** (comprehensive in-app manual)
+7. **Customizing Settings**: Press <kbd>S</kbd> to toggle Night Owl mode, confetti, sound, compact mode, or inspect storage diagnostics.
 
 ---
 
@@ -134,6 +165,7 @@ npx vercel
 |---|---|
 | <kbd>N</kbd> | Open New Habit dialog |
 | <kbd>J</kbd> | Open Quick Daily Reflection / Journal entry (<kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save) |
+| <kbd>S</kbd> | Open **Preferences & Settings** modal |
 | <kbd>T</kbd> | Jump to today's date & current month |
 | <kbd>&larr;</kbd> / <kbd>&rarr;</kbd> | Navigate previous / next month |
 | <kbd>1</kbd> | Switch to **Habit Grid** view |
@@ -190,6 +222,7 @@ Detailed project documentation is available in the repository:
 | Command | Description |
 |---|---|
 | `npm run dev` | Starts Vite local development server at `http://127.0.0.1:5173/` |
+| `npm test` | Runs the automated unit and regression test suite (17 tests) |
 | `npm run build` | Compiles optimized production bundle in `dist/` (~26 kB total gzipped) |
 | `npm run preview`| Serves the production `dist/` build locally |
 

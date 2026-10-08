@@ -119,6 +119,7 @@ const guideGoToGridBtn = document.getElementById('guideGoToGridBtn');
 
 const categoryChips = document.getElementById('categoryChips');
 const headerStatsSummary = document.getElementById('headerStatsSummary');
+const subHeaderBar = document.getElementById('subHeaderBar') || document.querySelector('.sub-header-bar');
 
 const habitTableHead = document.getElementById('habitTableHead');
 const habitTableBody = document.getElementById('habitTableBody');
@@ -490,6 +491,7 @@ function init() {
   renderCategoryChips();
   renderColorSwatches();
   updateView();
+  setView(activeView);
 }
 
 // Exactly balanced Themes List: 5 Dark Themes & 5 Light Themes
@@ -611,11 +613,20 @@ function renderThemeGalleryCards() {
             <span class="theme-card-emoji">${theme.icon}</span>
             <span class="theme-card-name">${theme.label}</span>
           </div>
-          <span class="theme-card-badge ${isDark ? 'badge-dark' : 'badge-light'}">${theme.mode}</span>
+          <div class="theme-card-badges-wrap">
+            ${isActive ? `
+              <span class="theme-card-active-tag">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Active
+              </span>
+            ` : ''}
+            <span class="theme-card-badge ${isDark ? 'badge-dark' : 'badge-light'}">${theme.mode}</span>
+          </div>
         </div>
-        ${isActive ? '<span class="theme-card-active-tag">✓ Active</span>' : ''}
         <div class="theme-card-palette">
-          ${theme.colors.map(c => `<span class="palette-swatch" style="background-color: ${c}"></span>`).join('')}
+          ${theme.colors.map((c, i) => `<span class="palette-swatch" style="background-color: ${c}" title="Color ${i + 1}: ${c}"></span>`).join('')}
         </div>
       </div>
     `;
@@ -726,6 +737,9 @@ function updateSoundIcon() {
 // ==========================================
 function setView(viewName) {
   activeView = viewName;
+  if (subHeaderBar) {
+    subHeaderBar.classList.toggle('hidden', viewName !== 'grid');
+  }
   [tabGrid, tabAnalytics, tabJournal, tabGuide].forEach(tab => {
     if (!tab) return;
     const isSelected = tab.getAttribute('data-view') === viewName;
