@@ -620,12 +620,46 @@ button {
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  transition: var(--transition-fast);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+}
+
+.btn-icon-ghost svg {
+  display: block;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
 }
 
 .btn-icon-ghost:hover {
   background-color: var(--bg-surface-elevated);
   color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.btn-icon-ghost:active {
+  transform: scale(0.92);
+}
+
+.btn-icon-ghost:focus-visible {
+  outline: 2px solid var(--primary-glow);
+  outline-offset: 2px;
+}
+
+#openSettingsModalBtn svg {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#openSettingsModalBtn:hover svg {
+  transform: rotate(60deg);
+}
+
+#openSettingsModalBtn.active {
+  background-color: var(--bg-surface-elevated);
+  color: var(--primary);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
 }
 
 /* Dropdown Menu */
@@ -3855,6 +3889,324 @@ kbd {
   border: 1px solid rgba(0, 0, 0, 0.15);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
+
+/* ==========================================================================
+   SETTINGS MODAL & TOGGLES (DailyHabits Pro)
+   ========================================================================== */
+
+.settings-dialog {
+  max-width: 680px;
+  width: 95%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-modal-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  text-transform: uppercase;
+}
+
+.settings-modal-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: var(--bg-surface-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+}
+
+.settings-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+
+.settings-section-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+  padding-bottom: 2px;
+}
+
+.settings-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-item-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-item-desc {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+/* Toggle Switch Component */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--bg-surface-hover);
+  border: 1px solid var(--border-strong);
+  transition: all var(--transition-fast);
+  border-radius: 24px;
+}
+
+.toggle-slider::before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #cbd5e1;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translate(18px, -50%);
+  background-color: #ffffff;
+}
+
+.toggle-switch:hover .toggle-slider {
+  border-color: var(--border-highlight);
+}
+
+.toggle-switch input:focus-visible + .toggle-slider {
+  outline: 2px solid var(--primary-glow);
+  outline-offset: 2px;
+}
+
+/* Sub-controls (sliders, select dropdowns) */
+.settings-sub-control {
+  margin-top: 4px;
+  padding: 10px 14px;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-sub-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.settings-sub-label strong {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.settings-range-slider {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.settings-sub-note {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.settings-select {
+  padding: 6px 12px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.settings-select:focus {
+  border-color: var(--primary);
+}
+
+/* Storage Health Controls */
+.health-btn-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.health-btn-group .btn-secondary-action {
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.health-btn-group .btn-secondary-action:hover {
+  transform: translateY(-1px);
+}
+
+.health-result-box {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.health-result-box.ok {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.08);
+  color: #10b981;
+}
+
+.health-result-box.repaired {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+  color: var(--primary);
+}
+
+.settings-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.settings-storage-badge {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+/* ==========================================================================
+   COMPACT DENSITY TABLE MODE
+   ========================================================================== */
+body[data-compact="true"] .habit-table-row {
+  height: 38px !important;
+}
+
+body[data-compact="true"] .habit-table-cell {
+  padding: 4px 6px !important;
+}
+
+body[data-compact="true"] .habit-title-cell {
+  padding-left: 10px !important;
+  font-size: 0.82rem !important;
+}
+
+body[data-compact="true"] .check-cell-btn {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+body[data-compact="true"] .day-col-header {
+  height: 42px !important;
+  padding: 4px 2px !important;
+}
+
+/* ==========================================================================
+   REDUCED MOTION / ANIMATIONS TOGGLE (Harvested from v1)
+   ========================================================================== */
+html[data-animations="false"] *,
+html[data-animations="false"] *::before,
+html[data-animations="false"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
 
 
 

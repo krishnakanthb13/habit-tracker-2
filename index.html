@@ -93,7 +93,7 @@
         </button>
 
         <div class="icon-actions-group">
-          <!-- Daily Reflection Note (Icon Only) -->
+          <!-- Daily Reflection Note (Edit Icon) -->
           <button id="openQuickNoteBtn" class="btn-icon-ghost" title="Daily Reflection / Quick Note (Hotkey: J)" aria-label="Daily Note">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
           </button>
@@ -104,7 +104,15 @@
             <svg id="soundIconOff" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
           </button>
 
-          <!-- PWA Install (Icon Only beside vol & edit) -->
+          <!-- Settings & Preferences (Icon Only) -->
+          <button id="openSettingsModalBtn" class="btn-icon-ghost" title="Preferences & Settings (Hotkey: S)" aria-label="Settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+
+          <!-- PWA Install (Icon Only) -->
           <button id="pwaInstallBtn" class="btn-icon-ghost" title="Install DailyHabits App (PWA)" aria-label="Install App">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -126,6 +134,13 @@
             </button>
             <div id="proToolsDropdown" class="dropdown-menu hidden">
               <div class="dropdown-header">Quick Tools & Themes</div>
+              <button class="dropdown-item" id="proToolsSettingsBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                Settings & Toggles (S)
+              </button>
               <button class="dropdown-item" id="proToolsInstallBtn">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Install App (PWA)
@@ -586,6 +601,10 @@
                     <td>Switch to this <strong>How to Use</strong> guide</td>
                   </tr>
                   <tr>
+                    <td><kbd>S</kbd></td>
+                    <td>Open <strong>Preferences & Settings</strong> dialog</td>
+                  </tr>
+                  <tr>
                     <td><kbd>?</kbd></td>
                     <td>Toggle keyboard shortcuts help dialog</td>
                   </tr>
@@ -853,8 +872,172 @@
           <div class="shortcut-item"><kbd>T</kbd> <span>Jump to current month / today</span></div>
           <div class="shortcut-item"><kbd>&larr;</kbd> / <kbd>&rarr;</kbd> <span>Previous / Next month</span></div>
           <div class="shortcut-item"><kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> / <kbd>4</kbd> <span>Switch views (Grid, Analytics, Journal, Guide)</span></div>
+          <div class="shortcut-item"><kbd>S</kbd> <span>Open Preferences & Settings</span></div>
           <div class="shortcut-item"><kbd>?</kbd> <span>Open this shortcuts help</span></div>
           <div class="shortcut-item"><kbd>Esc</kbd> <span>Close any modal</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: SETTINGS & PREFERENCES -->
+    <div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+      <div class="modal-dialog modal-dialog-lg settings-dialog">
+        <div class="modal-header">
+          <div class="settings-modal-header-info">
+            <div class="settings-title-row">
+              <span class="settings-pill">PREFERENCES</span>
+              <h2 id="settingsModalTitle" class="modal-heading">Settings & Toggles</h2>
+            </div>
+            <p class="modal-subheading">Fine-tune animations, celebrations, time boundaries, streak rules, and storage health.</p>
+          </div>
+          <button id="closeSettingsModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+        </div>
+
+        <div class="settings-modal-body">
+          <!-- Section 1: Celebrations & Audio Feedback -->
+          <div class="settings-section">
+            <h3 class="settings-section-title">🎉 Celebrations & Feedback</h3>
+            
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Confetti Celebrations</div>
+                <div class="settings-item-desc">Burst animated confetti on goal completion and daily routine finishes. Turn off for distraction-free tracking.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleConfetti" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Audio & Sound Effects</div>
+                <div class="settings-item-desc">Play satisfying audio feedback on check-in, uncheck, and goal completion.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleSound" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">UI Animations & Micro-Interactions</div>
+                <div class="settings-item-desc">Enable smooth glowing cards, transitions, and pulsing badges. Turn off for battery saving or reduced motion.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleAnimations" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 2: Time & Streak Logic (Harvested from v1) -->
+          <div class="settings-section">
+            <h3 class="settings-section-title">🌙 Time & Streak Rules</h3>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Night Owl Mode (Day Extension)</div>
+                <div class="settings-item-desc">Extends the active tracking day past midnight. Past-midnight check-ins count toward yesterday before sleep.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleDayExtension">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div id="dayExtensionHourWrap" class="settings-sub-control hidden">
+              <div class="settings-sub-label">
+                <span>Cutoff Hour Threshold:</span>
+                <strong id="dayExtensionHourDisplay">3:00 AM</strong>
+              </div>
+              <input type="range" id="dayExtensionHourInput" min="1" max="6" step="1" value="3" class="settings-range-slider">
+              <span class="settings-sub-note">Calendar shifts to the next day only after this hour.</span>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Skip Days Streak Protection (Freeze)</div>
+                <div class="settings-item-desc">When ON, skipped rest days preserve streaks (streak freeze). When OFF (strict mode), skipped days reset the streak.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleSkipStreak" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">First Day of the Week</div>
+                <div class="settings-item-desc">Starting weekday for monthly headers and weekly consistency charts.</div>
+              </div>
+              <select id="firstDayOfWeekSelect" class="settings-select">
+                <option value="1">Monday (ISO Standard)</option>
+                <option value="0">Sunday (US Standard)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Section 3: Display & Table Density -->
+          <div class="settings-section">
+            <h3 class="settings-section-title">📐 Display & Layout</h3>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Compact Grid Density</div>
+                <div class="settings-item-desc">Reduces cell padding and row heights to fit 15+ habits on screen with minimal vertical scrolling.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleCompactMode">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Auto-Scroll to Today on Launch</div>
+                <div class="settings-item-desc">Automatically scrolls the habit table horizontally to center today's active column.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleAutoScrollToday" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-item">
+              <div class="settings-item-text">
+                <div class="settings-item-label">Show Completion Percentage & Badges</div>
+                <div class="settings-item-desc">Display progress percentage badges and achievement ranks beside habit names.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="toggleShowRanks" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 4: Storage Doctor & Diagnostics (Harvested from v1) -->
+          <div class="settings-section">
+            <h3 class="settings-section-title">🩺 Storage Health & Diagnostics</h3>
+            <p class="settings-section-sub">Validate local database integrity, fix corrupt dates, or repair missing categories without data loss.</p>
+
+            <div class="health-btn-group">
+              <button type="button" id="btnCheckHealth" class="btn-secondary-action btn-sm">
+                <span>🔍 Verify Data Integrity</span>
+              </button>
+              <button type="button" id="btnRepairStorage" class="btn-secondary-action btn-sm">
+                <span>🛠️ Run Safe Auto-Repair</span>
+              </button>
+            </div>
+
+            <div id="healthResultBox" class="health-result-box hidden"></div>
+          </div>
+        </div>
+
+        <div class="modal-footer settings-modal-footer">
+          <span class="settings-storage-badge" id="settingsStorageFootprint">⚡ Ultra-lightweight: ~0.2 KB</span>
+          <button type="button" id="closeSettingsFooterBtn" class="btn-primary-action">Done</button>
         </div>
       </div>
     </div>

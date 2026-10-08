@@ -1,6 +1,6 @@
 {
   "name": "daily-habits-tracker",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "Ultra-lightweight daily habit tracker with all paywalled features unlocked",
   "author": "Krishna Kanth B (https://github.com/krishnakanthb13)",
   "license": "GPL-3.0-or-later",
@@ -12,7 +12,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/storage.test.js tests/analytics.test.js"
   },
   "devDependencies": {
     "vite": "^5.4.2"

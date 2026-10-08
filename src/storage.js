@@ -230,10 +230,16 @@ export function saveAppData(data) {
 
 export function loadSettings() {
   const defaultSettings = {
-    theme: 'dark', // 'dark', 'light', 'system'
+    theme: 'dark', // 'dark', 'light', 'system', 'midnight', etc.
     soundEnabled: true,
     confettiEnabled: true,
+    animationsEnabled: true,
+    dayExtensionEnabled: false,
+    dayExtensionHour: 3,
+    skipPreservesStreak: true,
     firstDayOfWeek: 1, // 1 = Monday, 0 = Sunday
+    compactMode: false,
+    autoScrollToday: true,
     showCompletedRanks: true,
     activeCategory: 'all'
   };
@@ -255,6 +261,120 @@ export function saveSettings(settings) {
   } catch (e) {
     console.error('Failed to save settings:', e);
   }
+}
+
+// Effective Date & Night Owl Logic (harvested from v1 day_boundary)
+export function getEffectiveDate(timestamp = new Date(), dayExtensionEnabled = false, cutoffHour = 3) {
+  const date = new Date(timestamp);
+  if (dayExtensionEnabled && date.getHours() < cutoffHour) {
+    // Current time is before cutoff (e.g. 1:30 AM before 3:00 AM) - treat as previous calendar day
+    date.setDate(date.getDate() - 1);
+  }
+  return date;
+}
+
+export function getEffectiveTodayKey(settings = {}, timestamp = new Date()) {
+  const effDate = getEffectiveDate(
+    timestamp,
+    Boolean(settings.dayExtensionEnabled),
+    Number(settings.dayExtensionHour) || 3
+  );
+  return formatDateKey(effDate.getFullYear(), effDate.getMonth(), effDate.getDate());
+}
+
+// Storage Doctor & Self-Repair Diagnostic (harvested from v1 health/db_repair)
+export function validateAndRepairStorage() {
+  const currentData = loadAppData();
+  const issues = [];
+  const repairs = [];
+
+  // 1. Check categories
+  let categories = currentData.categories;
+  if (!Array.isArray(categories) || categories.length === 0) {
+    categories = JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+    repairs.push('Restored missing categories with standard defaults.');
+  }
+
+  // 2. Validate habits
+  const validHabits = [];
+  const seenIds = new Set();
+  const dateKeyRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  (currentData.habits || []).forEach((habit, idx) => {
+    if (!habit || typeof habit !== 'object') {
+      issues.push(`Removed invalid habit record at position ${idx + 1}`);
+      return;
+    }
+
+    let id = habit.id;
+    if (!id || seenIds.has(id)) {
+      id = 'habit_' + Date.now() + '_' + idx;
+      repairs.push(`Assigned fresh unique ID "${id}" to habit "${habit.title || 'Untitled'}"`);
+    }
+    seenIds.add(id);
+
+    // Clean completions map
+    const cleanCompletions = {};
+    if (habit.completions && typeof habit.completions === 'object') {
+      Object.entries(habit.completions).forEach(([dateKey, val]) => {
+        if (!dateKeyRegex.test(dateKey)) {
+          issues.push(`Stripped non-standard date format "${dateKey}" in "${habit.title}"`);
+          return;
+        }
+        if (val === true || val === 'skipped') {
+          cleanCompletions[dateKey] = val;
+        } else if (typeof val === 'object' && val !== null) {
+          const num = Number(val.value);
+          cleanCompletions[dateKey] = {
+            value: isNaN(num) ? 1 : num,
+            note: typeof val.note === 'string' ? val.note.slice(0, 500) : ''
+          };
+        }
+      });
+    }
+
+    validHabits.push({
+      id,
+      title: (typeof habit.title === 'string' && habit.title.trim()) ? habit.title.trim() : 'Routine #' + (idx + 1),
+      category: habit.category || 'health',
+      color: habit.color || '#10b981',
+      goalDays: Number(habit.goalDays) || 20,
+      frequencyType: habit.frequencyType || 'daily',
+      frequencyConfig: habit.frequencyConfig || { daysPerWeek: 7 },
+      targetMetric: habit.targetMetric || null,
+      archived: Boolean(habit.archived),
+      createdAt: habit.createdAt || new Date().toISOString(),
+      completions: cleanCompletions
+    });
+  });
+
+  // 3. Clean reflections & notes
+  const cleanNotes = {};
+  if (currentData.notes && typeof currentData.notes === 'object') {
+    Object.entries(currentData.notes).forEach(([k, note]) => {
+      if (dateKeyRegex.test(k) && typeof note === 'object' && note !== null) {
+        cleanNotes[k] = note;
+      }
+    });
+  }
+
+  const repairedData = {
+    habits: validHabits,
+    notes: cleanNotes,
+    categories,
+    customCategories: currentData.customCategories || [],
+    version: 2
+  };
+
+  saveAppData(repairedData);
+
+  return {
+    ok: issues.length === 0,
+    issuesFound: issues.length,
+    issues,
+    repairsMade: repairs,
+    habitCount: validHabits.length
+  };
 }
 
 // Export data to JSON string for downloading

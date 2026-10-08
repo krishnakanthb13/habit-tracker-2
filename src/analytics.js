@@ -2,8 +2,8 @@
 
 import { formatDateKey, parseDateKey } from './storage.js';
 
-// Calculate current streak & best streak for a habit
-export function calculateStreak(habit, referenceDate = new Date()) {
+// Calculate current streak & best streak for a habit (with configurable skipPreservesStreak rule)
+export function calculateStreak(habit, referenceDate = new Date(), skipPreservesStreak = true) {
   const completions = habit.completions || {};
   let currentStreak = 0;
   let bestStreak = 0;
@@ -25,7 +25,6 @@ export function calculateStreak(habit, referenceDate = new Date()) {
   });
 
   // Calculate Best Streak across full history
-  // Find min and max date
   const firstDate = new Date(dateKeys[0]);
   const today = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
   
@@ -39,7 +38,7 @@ export function calculateStreak(habit, referenceDate = new Date()) {
       if (runningStreak > bestStreak) {
         bestStreak = runningStreak;
       }
-    } else if (val === 'skipped') {
+    } else if (val === 'skipped' && skipPreservesStreak) {
       // Skipped/freeze day preserves streak without incrementing
     } else {
       runningStreak = 0;
@@ -53,9 +52,13 @@ export function calculateStreak(habit, referenceDate = new Date()) {
   const todayKey = formatDateKey(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
   const todayVal = completions[todayKey];
 
-  // If today is completed or skipped, start from today.
+  // If today is completed (or skipped with protection enabled), start from today.
   // If not yet completed today, start checking from yesterday so we don't prematurely break streak before day ends.
-  if (todayVal !== true && !(typeof todayVal === 'object' && todayVal?.value > 0) && todayVal !== 'skipped') {
+  const isTodayActive = todayVal === true ||
+    (typeof todayVal === 'object' && todayVal?.value > 0) ||
+    (todayVal === 'skipped' && skipPreservesStreak);
+
+  if (!isTodayActive) {
     checkDate.setDate(checkDate.getDate() - 1);
   }
 
@@ -66,7 +69,7 @@ export function calculateStreak(habit, referenceDate = new Date()) {
     if (val === true || (typeof val === 'object' && val !== null && val.value > 0)) {
       currentStreak++;
       checkDate.setDate(checkDate.getDate() - 1);
-    } else if (val === 'skipped') {
+    } else if (val === 'skipped' && skipPreservesStreak) {
       // Freezes streak, continue backwards
       checkDate.setDate(checkDate.getDate() - 1);
     } else {
@@ -82,7 +85,7 @@ export function calculateStreak(habit, referenceDate = new Date()) {
 }
 
 // Monthly statistics for active month
-export function calculateMonthStats(habits, year, month) {
+export function calculateMonthStats(habits, year, month, skipPreservesStreak = true) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
@@ -116,7 +119,7 @@ export function calculateMonthStats(habits, year, month) {
     totalTargetDays += goal;
     totalAchievedDays += achieved;
 
-    const streakData = calculateStreak(habit);
+    const streakData = calculateStreak(habit, isCurrentMonth ? today : new Date(year, month, daysInMonth), skipPreservesStreak);
 
     return {
       habitId: habit.id,

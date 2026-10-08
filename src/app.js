@@ -1,5 +1,9 @@
 // Safe confetti trigger supporting both browser global (window.confetti) and environments with/without bundlers
 function triggerCelebrationConfetti(options = {}) {
+  // If user disabled confetti in settings, exit immediately with 0 overhead
+  if (typeof settings !== 'undefined' && settings && settings.confettiEnabled === false) {
+    return;
+  }
   const confettiFn = (typeof window !== 'undefined' && typeof window.confetti === 'function') ? window.confetti : null;
   if (confettiFn) {
     try {
@@ -28,7 +32,10 @@ import {
   clearAllData,
   resetToDemoData,
   exportAllTimeToCSV,
-  importHabitData
+  importHabitData,
+  getEffectiveDate,
+  getEffectiveTodayKey,
+  validateAndRepairStorage
 } from './storage.js';
 import {
   playCheckSound,
@@ -48,7 +55,12 @@ import {
 let appData = loadAppData();
 let settings = loadSettings();
 
-const todayDate = new Date();
+// Effective Date helper (supports Day Extension / Night Owl mode from v1)
+function getEffectiveToday() {
+  return getEffectiveDate(new Date(), Boolean(settings.dayExtensionEnabled), Number(settings.dayExtensionHour) || 3);
+}
+
+let todayDate = getEffectiveToday();
 let viewYear = todayDate.getFullYear();
 let viewMonth = todayDate.getMonth(); // 0-indexed
 let activeView = 'grid'; // 'grid' | 'analytics' | 'journal'
@@ -123,6 +135,30 @@ const themeGalleryGrid = document.getElementById('themeGalleryGrid');
 
 const proToolsMenuBtn = document.getElementById('proToolsMenuBtn');
 const proToolsDropdown = document.getElementById('proToolsDropdown');
+
+const openSettingsModalBtn = document.getElementById('openSettingsModalBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+const closeSettingsFooterBtn = document.getElementById('closeSettingsFooterBtn');
+const proToolsSettingsBtn = document.getElementById('proToolsSettingsBtn');
+
+const toggleConfetti = document.getElementById('toggleConfetti');
+const toggleSound = document.getElementById('toggleSound');
+const toggleAnimations = document.getElementById('toggleAnimations');
+const toggleDayExtension = document.getElementById('toggleDayExtension');
+const dayExtensionHourWrap = document.getElementById('dayExtensionHourWrap');
+const dayExtensionHourInput = document.getElementById('dayExtensionHourInput');
+const dayExtensionHourDisplay = document.getElementById('dayExtensionHourDisplay');
+const dayExtensionHourNote = document.getElementById('dayExtensionHourNote');
+const toggleSkipStreak = document.getElementById('toggleSkipStreak');
+const firstDayOfWeekSelect = document.getElementById('firstDayOfWeekSelect');
+const toggleCompactMode = document.getElementById('toggleCompactMode');
+const toggleAutoScrollToday = document.getElementById('toggleAutoScrollToday');
+const toggleShowRanks = document.getElementById('toggleShowRanks');
+const btnCheckHealth = document.getElementById('btnCheckHealth');
+const btnRepairStorage = document.getElementById('btnRepairStorage');
+const healthResultBox = document.getElementById('healthResultBox');
+const settingsStorageFootprint = document.getElementById('settingsStorageFootprint');
 
 const openDataModalBtn = document.getElementById('openDataModalBtn');
 const dataModal = document.getElementById('dataModal');
@@ -352,6 +388,78 @@ export function showConfirmation({
 }
 
 // ==========================================
+// SETTINGS CONTROLLER & PREFERENCES
+// ==========================================
+function applySettings(s) {
+  // 1. Compact Density Mode
+  document.body.setAttribute('data-compact', s.compactMode ? 'true' : 'false');
+
+  // 2. Animations / Low-Power Mode (harvested from v1)
+  document.documentElement.setAttribute('data-animations', s.animationsEnabled !== false ? 'true' : 'false');
+
+  // 3. Update effective today date
+  todayDate = getEffectiveToday();
+}
+
+function openSettingsModal() {
+  if (!settingsModal) return;
+
+  // Sync checkboxes and inputs with current settings
+  if (toggleConfetti) toggleConfetti.checked = settings.confettiEnabled !== false;
+  if (toggleSound) toggleSound.checked = settings.soundEnabled !== false;
+  if (toggleAnimations) toggleAnimations.checked = settings.animationsEnabled !== false;
+
+  const dayExt = Boolean(settings.dayExtensionEnabled);
+  if (toggleDayExtension) toggleDayExtension.checked = dayExt;
+  if (dayExtensionHourWrap) dayExtensionHourWrap.classList.toggle('hidden', !dayExt);
+  const hour = settings.dayExtensionHour || 3;
+  if (dayExtensionHourInput) dayExtensionHourInput.value = hour;
+  if (dayExtensionHourDisplay) dayExtensionHourDisplay.textContent = `${hour}:00 AM`;
+  if (dayExtensionHourNote) dayExtensionHourNote.textContent = `${hour}:00 AM`;
+
+  if (toggleSkipStreak) toggleSkipStreak.checked = settings.skipPreservesStreak !== false;
+  if (firstDayOfWeekSelect) firstDayOfWeekSelect.value = String(settings.firstDayOfWeek ?? 1);
+
+  if (toggleCompactMode) toggleCompactMode.checked = Boolean(settings.compactMode);
+  if (toggleAutoScrollToday) toggleAutoScrollToday.checked = settings.autoScrollToday !== false;
+  if (toggleShowRanks) toggleShowRanks.checked = settings.showCompletedRanks !== false;
+
+  // Calculate local storage footprint in KB
+  if (settingsStorageFootprint) {
+    try {
+      const dataBytes = JSON.stringify(appData).length;
+      const settingsBytes = JSON.stringify(settings).length;
+      const totalKb = ((dataBytes + settingsBytes) / 1024).toFixed(2);
+      settingsStorageFootprint.textContent = `⚡ Local Data: ~${totalKb} KB (Zero cloud/server bloat)`;
+    } catch {
+      settingsStorageFootprint.textContent = '⚡ Ultra-lightweight local storage';
+    }
+  }
+
+  if (healthResultBox) {
+    healthResultBox.className = 'health-result-box hidden';
+    healthResultBox.innerHTML = '';
+  }
+
+  settingsModal.classList.remove('hidden');
+  if (openSettingsModalBtn) openSettingsModalBtn.classList.add('active');
+}
+
+function closeSettingsModal() {
+  if (settingsModal) settingsModal.classList.add('hidden');
+  if (openSettingsModalBtn) openSettingsModalBtn.classList.remove('active');
+}
+
+function toggleSettingsModal() {
+  if (!settingsModal) return;
+  if (settingsModal.classList.contains('hidden')) {
+    openSettingsModal();
+  } else {
+    closeSettingsModal();
+  }
+}
+
+// ==========================================
 // INITIALIZATION
 // ==========================================
 function init() {
@@ -359,6 +467,7 @@ function init() {
     appData.categories = JSON.parse(JSON.stringify(CATEGORIES));
   }
   applyTheme(settings.theme);
+  applySettings(settings);
   updateSoundIcon();
   setupEventListeners();
   setupPwa();
@@ -781,7 +890,7 @@ function renderHabitGrid() {
 
   activeHabits.forEach(habit => {
     let achievedDaysCount = 0;
-    const streakData = calculateStreak(habit);
+    const streakData = calculateStreak(habit, getEffectiveToday(), settings.skipPreservesStreak);
     const goal = habit.goalDays || daysInMonth;
 
     const catObj = (appData.categories || CATEGORIES).find(c => c.id === habit.category);
@@ -932,8 +1041,22 @@ function renderHabitGrid() {
   if (settings.activeCategory === 'archived') {
     headerStatsSummary.innerHTML = `<span class="badge-archived">Archived Vault</span> Viewing ${activeHabits.length} archived routine${activeHabits.length !== 1 ? 's' : ''}`;
   } else {
-    const monthStats = calculateMonthStats(appData.habits, viewYear, viewMonth);
+    const monthStats = calculateMonthStats(appData.habits, viewYear, viewMonth, settings.skipPreservesStreak);
     headerStatsSummary.textContent = `${activeHabits.length} Habits • ${monthStats.overallRate}% Consistency this month`;
+  }
+
+  // Auto-scroll to today if enabled
+  if (settings.autoScrollToday && isCurrentMonth) {
+    const todayHeader = document.querySelector('.th-day-col.is-today');
+    const scrollWrap = document.getElementById('gridScrollWrapper');
+    if (todayHeader && scrollWrap) {
+      setTimeout(() => {
+        const wrapRect = scrollWrap.getBoundingClientRect();
+        const cellRect = todayHeader.getBoundingClientRect();
+        const offset = (cellRect.left + cellRect.width / 2) - (wrapRect.left + wrapRect.width / 2);
+        scrollWrap.scrollLeft += offset;
+      }, 50);
+    }
   }
 }
 
@@ -1629,7 +1752,7 @@ function handleQuickNoteSubmit(e) {
 // ANALYTICS VIEW
 // ==========================================
 function renderAnalytics() {
-  const stats = calculateMonthStats(appData.habits, viewYear, viewMonth);
+  const stats = calculateMonthStats(appData.habits, viewYear, viewMonth, settings.skipPreservesStreak);
 
   document.getElementById('kpiRate').textContent = `${stats.overallRate}%`;
   document.getElementById('kpiRateSub').textContent = `${stats.totalAchievedDays} of ${stats.totalTargetDays} target days achieved`;
@@ -1641,7 +1764,7 @@ function renderAnalytics() {
   let totalLifetimeCompletions = 0;
 
   appData.habits.forEach(h => {
-    const s = calculateStreak(h);
+    const s = calculateStreak(h, getEffectiveToday(), settings.skipPreservesStreak);
     totalLifetimeCompletions += s.totalCompletions;
     if (!h.archived && s.currentStreak > maxStreak) {
       maxStreak = s.currentStreak;
@@ -1744,7 +1867,7 @@ function renderLeaderboard() {
     .filter(h => !h.archived)
     .map(h => ({
       habit: h,
-      streak: calculateStreak(h)
+      streak: calculateStreak(h, getEffectiveToday(), settings.skipPreservesStreak)
     }))
     .sort((a, b) => b.streak.currentStreak - a.streak.currentStreak);
 
@@ -2046,6 +2169,159 @@ function setupEventListeners() {
     showToast(settings.soundEnabled ? 'Sound feedback enabled 🔊' : 'Sound feedback muted 🔇', 'info');
   });
 
+  // Settings Modal Listeners
+  if (openSettingsModalBtn) openSettingsModalBtn.addEventListener('click', openSettingsModal);
+  if (closeSettingsModalBtn) closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
+  if (closeSettingsFooterBtn) closeSettingsFooterBtn.addEventListener('click', closeSettingsModal);
+  if (proToolsSettingsBtn) {
+    proToolsSettingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      proToolsDropdown.classList.add('hidden');
+      openSettingsModal();
+    });
+  }
+  if (settingsModal) {
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) closeSettingsModal();
+    });
+  }
+
+  // Toggles inside Settings Modal
+  if (toggleConfetti) {
+    toggleConfetti.addEventListener('change', (e) => {
+      settings.confettiEnabled = e.target.checked;
+      saveSettings(settings);
+      showToast(settings.confettiEnabled ? 'Confetti celebrations enabled 🎉' : 'Confetti celebrations turned off', 'info');
+    });
+  }
+
+  if (toggleSound) {
+    toggleSound.addEventListener('change', (e) => {
+      settings.soundEnabled = e.target.checked;
+      saveSettings(settings);
+      updateSoundIcon();
+      if (settings.soundEnabled) playCheckSound();
+      showToast(settings.soundEnabled ? 'Sound feedback enabled 🔊' : 'Sound feedback muted 🔇', 'info');
+    });
+  }
+
+  if (toggleAnimations) {
+    toggleAnimations.addEventListener('change', (e) => {
+      settings.animationsEnabled = e.target.checked;
+      saveSettings(settings);
+      applySettings(settings);
+      showToast(settings.animationsEnabled ? 'UI animations enabled ⚡' : 'Reduced motion mode active', 'info');
+    });
+  }
+
+  if (toggleDayExtension) {
+    toggleDayExtension.addEventListener('change', (e) => {
+      settings.dayExtensionEnabled = e.target.checked;
+      saveSettings(settings);
+      if (dayExtensionHourWrap) dayExtensionHourWrap.classList.toggle('hidden', !settings.dayExtensionEnabled);
+      applySettings(settings);
+      updateView();
+      showToast(settings.dayExtensionEnabled ? 'Night Owl mode enabled 🌙' : 'Night Owl mode disabled', 'info');
+    });
+  }
+
+  if (dayExtensionHourInput) {
+    dayExtensionHourInput.addEventListener('input', (e) => {
+      const h = parseInt(e.target.value, 10);
+      settings.dayExtensionHour = h;
+      if (dayExtensionHourDisplay) dayExtensionHourDisplay.textContent = `${h}:00 AM`;
+      if (dayExtensionHourNote) dayExtensionHourNote.textContent = `${h}:00 AM`;
+      saveSettings(settings);
+      applySettings(settings);
+      updateView();
+    });
+  }
+
+  if (toggleSkipStreak) {
+    toggleSkipStreak.addEventListener('change', (e) => {
+      settings.skipPreservesStreak = e.target.checked;
+      saveSettings(settings);
+      updateView();
+      showToast(settings.skipPreservesStreak ? 'Rest/skip days protect streak 🛡️' : 'Strict mode: Skips break streak', 'info');
+    });
+  }
+
+  if (firstDayOfWeekSelect) {
+    firstDayOfWeekSelect.addEventListener('change', (e) => {
+      settings.firstDayOfWeek = parseInt(e.target.value, 10);
+      saveSettings(settings);
+      updateView();
+      showToast(settings.firstDayOfWeek === 1 ? 'Calendar starts on Monday' : 'Calendar starts on Sunday', 'info');
+    });
+  }
+
+  if (toggleCompactMode) {
+    toggleCompactMode.addEventListener('change', (e) => {
+      settings.compactMode = e.target.checked;
+      saveSettings(settings);
+      applySettings(settings);
+    });
+  }
+
+  if (toggleAutoScrollToday) {
+    toggleAutoScrollToday.addEventListener('change', (e) => {
+      settings.autoScrollToday = e.target.checked;
+      saveSettings(settings);
+    });
+  }
+
+  if (toggleShowRanks) {
+    toggleShowRanks.addEventListener('change', (e) => {
+      settings.showCompletedRanks = e.target.checked;
+      saveSettings(settings);
+      updateView();
+    });
+  }
+
+  // Storage Health Doctor Listeners (from v1)
+  if (btnCheckHealth) {
+    btnCheckHealth.addEventListener('click', () => {
+      const res = validateAndRepairStorage();
+      if (healthResultBox) {
+        healthResultBox.classList.remove('hidden');
+        if (res.ok) {
+          healthResultBox.className = 'health-result-box ok';
+          healthResultBox.innerHTML = `✅ <strong>Storage Health Perfect!</strong><br>All ${res.habitCount} routines, completions, and categories are verified and clean.`;
+        } else {
+          healthResultBox.className = 'health-result-box repaired';
+          healthResultBox.innerHTML = `⚠️ <strong>Integrity Scan Complete:</strong><br>${res.issuesFound} minor formatting issue(s) detected. Click "Run Safe Auto-Repair" to sanitize.`;
+        }
+      }
+    });
+  }
+
+  if (btnRepairStorage) {
+    btnRepairStorage.addEventListener('click', async () => {
+      const confirmed = await showConfirmation({
+        title: 'Run Storage Repair?',
+        message: 'This will inspect and clean up any orphaned date keys or invalid categories without losing your recorded completions.\n\nContinue?',
+        icon: '🛠️',
+        confirmText: 'Run Repair',
+        confirmType: 'primary'
+      });
+      if (!confirmed) return;
+
+      const res = validateAndRepairStorage();
+      appData = loadAppData();
+      updateView();
+
+      if (healthResultBox) {
+        healthResultBox.classList.remove('hidden');
+        healthResultBox.className = 'health-result-box ok';
+        const msg = res.repairsMade.length > 0 
+          ? `🔧 <strong>Repairs Applied:</strong><br>${res.repairsMade.join('<br>')}`
+          : `✅ <strong>Storage Clean:</strong> Database is in optimal condition with 0 issues.`;
+        healthResultBox.innerHTML = msg;
+      }
+      showToast('Storage integrity repaired successfully 🩺', 'success');
+    });
+  }
+
   // Pro Tools Dropdown
   proToolsMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -2156,7 +2432,7 @@ function setupEventListeners() {
     }
 
     dataArchivedList.innerHTML = archivedHabits.map(habit => {
-      const streak = calculateStreak(habit);
+      const streak = calculateStreak(habit, getEffectiveToday(), settings.skipPreservesStreak);
       return `
         <div class="archived-habit-card" data-id="${habit.id}">
           <div class="archived-habit-card-left">
@@ -2740,6 +3016,7 @@ function setupEventListeners() {
         closeQuickNoteModal();
         closeDataModal();
         closeCategoryModal();
+        closeSettingsModal();
         shortcutsModal.classList.add('hidden');
         if (confirmModal) confirmModal.classList.add('hidden');
       }
@@ -2752,6 +3029,9 @@ function setupEventListeners() {
     } else if (e.key === 'j' || e.key === 'J') {
       e.preventDefault();
       openQuickNoteModal();
+    } else if (e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      toggleSettingsModal();
     } else if (e.key === 't' || e.key === 'T') {
       e.preventDefault();
       jumpToToday();
@@ -2778,6 +3058,7 @@ function setupEventListeners() {
       closeQuickNoteModal();
       closeDataModal();
       closeCategoryModal();
+      closeSettingsModal();
       shortcutsModal.classList.add('hidden');
       proToolsDropdown.classList.add('hidden');
       if (confirmModal) confirmModal.classList.add('hidden');
