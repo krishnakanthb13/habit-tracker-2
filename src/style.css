@@ -443,7 +443,6 @@ button {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(12px);
   gap: 16px;
 }
 
@@ -848,7 +847,12 @@ button {
 
 .view-panel.active {
   display: block;
-  animation: fadeIn 0.2s ease-out;
+  animation: viewFadeIn 0.15s ease-out;
+}
+
+@keyframes viewFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes fadeIn {
@@ -1848,14 +1852,21 @@ button {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(6px);
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 100;
   padding: 16px;
-  animation: fadeIn 0.15s ease-out;
+  animation: modalBackdropFadeIn 0.15s ease-out;
+  will-change: opacity;
+}
+
+@keyframes modalBackdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .modal-dialog {
@@ -1871,6 +1882,20 @@ button {
   padding: 24px;
   word-break: break-word;
   overflow-wrap: break-word;
+  animation: modalDialogPopIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@keyframes modalDialogPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .modal-dialog-sm {
@@ -2626,11 +2651,16 @@ kbd {
 
 .data-tab-content {
   display: none;
-  animation: fadeIn 0.15s ease-out;
 }
 
 .data-tab-content.active {
   display: block;
+  animation: tabFadeIn 0.12s ease-out;
+}
+
+@keyframes tabFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .tab-section-header {

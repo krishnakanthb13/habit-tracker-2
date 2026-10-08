@@ -64,6 +64,21 @@ let todayDate = getEffectiveToday();
 let viewYear = todayDate.getFullYear();
 let viewMonth = todayDate.getMonth(); // 0-indexed
 let activeView = 'grid'; // 'grid' | 'analytics' | 'journal'
+let hasAutoScrolledToday = false;
+
+// Ultra-fast regex-based escapeHtml avoiding DOM element allocations
+const HTML_ESCAPE_MAP = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return String(str ?? '');
+  return str.replace(/[&<>"']/g, char => HTML_ESCAPE_MAP[char]);
+}
 
 // Filter & prompt state
 let analyticsHeatmapFilterHabitId = 'all';
@@ -737,6 +752,7 @@ function setView(viewName) {
 }
 
 function goToPrevMonth() {
+  hasAutoScrolledToday = false;
   if (viewMonth === 0) {
     viewMonth = 11;
     viewYear--;
@@ -747,6 +763,7 @@ function goToPrevMonth() {
 }
 
 function goToNextMonth() {
+  hasAutoScrolledToday = false;
   if (viewMonth === 11) {
     viewMonth = 0;
     viewYear++;
@@ -757,6 +774,7 @@ function goToNextMonth() {
 }
 
 function jumpToToday() {
+  hasAutoScrolledToday = false;
   const now = new Date();
   viewYear = now.getFullYear();
   viewMonth = now.getMonth();
@@ -769,12 +787,14 @@ function updateView() {
   if (proToolsArchivedCount) proToolsArchivedCount.textContent = archivedCount;
   if (dataModalArchivedCount) dataModalArchivedCount.textContent = archivedCount;
 
-  populateCategorySelect();
   renderHabitGrid();
   renderCategoryChips();
   if (activeView === 'analytics') renderAnalytics();
   if (activeView === 'journal') renderJournal();
-  renderDataModalArchivedList();
+  // Only calculate and render archived list if data modal is actively open and showing archived tab
+  if (dataModal && !dataModal.classList.contains('hidden') && dataTabArchived && dataTabArchived.classList.contains('active')) {
+    renderDataModalArchivedList();
+  }
 }
 
 // ==========================================
@@ -888,12 +908,28 @@ function renderHabitGrid() {
   let bodyHtml = '';
   const dailyCompletionsCount = new Array(daysInMonth + 1).fill(0);
 
+  // Pre-index categories and notes for O(1) lookup in render loop
+  const catMap = new Map((appData.categories || CATEGORIES).map(c => [c.id, c]));
+  const notesByDateAndHabit = new Set();
+  const notesByDateGeneral = new Set();
+  if (Array.isArray(appData.notes)) {
+    for (const note of appData.notes) {
+      if (note.date) {
+        if (note.habitId) {
+          notesByDateAndHabit.add(`${note.date}:${note.habitId}`);
+        } else {
+          notesByDateGeneral.add(note.date);
+        }
+      }
+    }
+  }
+
   activeHabits.forEach(habit => {
     let achievedDaysCount = 0;
     const streakData = calculateStreak(habit, getEffectiveToday(), settings.skipPreservesStreak);
     const goal = habit.goalDays || daysInMonth;
 
-    const catObj = (appData.categories || CATEGORIES).find(c => c.id === habit.category);
+    const catObj = catMap.get(habit.category);
     const catName = catObj ? escapeHtml(catObj.name) : escapeHtml(habit.category || 'General');
     const catColor = catObj ? catObj.color : habit.color;
 
@@ -937,9 +973,10 @@ function renderHabitGrid() {
       let btnContent = '';
       let isCompleted = false;
 
-      // Check if day has attached note
-      const hasNote = appData.notes?.some(n => n.date === dateKey && (!n.habitId || n.habitId === habit.id)) ||
-        (typeof completionVal === 'object' && completionVal?.note);
+      // Check if day has attached note (O(1) Set lookup)
+      const hasNote = notesByDateGeneral.has(dateKey) ||
+        notesByDateAndHabit.has(`${dateKey}:${habit.id}`) ||
+        Boolean(typeof completionVal === 'object' && completionVal?.note);
 
       if (completionVal === true) {
         btnClasses.push('completed');
@@ -1045,18 +1082,19 @@ function renderHabitGrid() {
     headerStatsSummary.textContent = `${activeHabits.length} Habits • ${monthStats.overallRate}% Consistency this month`;
   }
 
-  // Auto-scroll to today if enabled
-  if (settings.autoScrollToday && isCurrentMonth) {
-    const todayHeader = document.querySelector('.th-day-col.is-today');
-    const scrollWrap = document.getElementById('gridScrollWrapper');
-    if (todayHeader && scrollWrap) {
-      setTimeout(() => {
+  // Auto-scroll to today if enabled (only once per month view load, not on every check toggle)
+  if (settings.autoScrollToday && isCurrentMonth && !hasAutoScrolledToday) {
+    hasAutoScrolledToday = true;
+    requestAnimationFrame(() => {
+      const todayHeader = document.querySelector('.th-day-col.is-today');
+      const scrollWrap = document.getElementById('gridScrollWrapper');
+      if (todayHeader && scrollWrap) {
         const wrapRect = scrollWrap.getBoundingClientRect();
         const cellRect = todayHeader.getBoundingClientRect();
         const offset = (cellRect.left + cellRect.width / 2) - (wrapRect.left + wrapRect.width / 2);
         scrollWrap.scrollLeft += offset;
-      }, 50);
-    }
+      }
+    });
   }
 }
 
@@ -1990,12 +2028,6 @@ function renderNotesFeed() {
   }).join('');
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 function handleSaveJournalNote() {
   const text = journalTextInput.value.trim();
   if (!text) return;
@@ -2397,10 +2429,32 @@ function setupEventListeners() {
     monthWrap.addEventListener('click', jumpToToday);
   }
 
-  // Data Modal Tabs & Controls
+  // Data Modal Tabs & Controls (Pre-cached for instant switching)
+  const dataTabBtns = dataModal ? Array.from(dataModal.querySelectorAll('.data-tab-btn')) : [];
+  const dataTabPanels = {
+    export: document.getElementById('dataTabExport'),
+    import: document.getElementById('dataTabImport'),
+    archived: document.getElementById('dataTabArchived'),
+    reset: document.getElementById('dataTabReset')
+  };
+
+  function switchDataTab(tabName) {
+    dataTabBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
+    });
+    if (dataTabPanels.export) dataTabPanels.export.classList.toggle('active', tabName === 'export');
+    if (dataTabPanels.import) dataTabPanels.import.classList.toggle('active', tabName === 'import');
+    if (dataTabPanels.archived) dataTabPanels.archived.classList.toggle('active', tabName === 'archived');
+    if (dataTabPanels.reset) dataTabPanels.reset.classList.toggle('active', tabName === 'reset');
+
+    if (tabName === 'archived') {
+      renderDataModalArchivedList();
+    }
+  }
+
   function openDataModal(tab = 'export') {
-    dataModal.classList.remove('hidden');
     switchDataTab(tab);
+    dataModal.classList.remove('hidden');
     proToolsDropdown.classList.add('hidden');
   }
 
@@ -2462,24 +2516,15 @@ function setupEventListeners() {
     }).join('');
   }
 
-  function switchDataTab(tabName) {
-    dataModal.querySelectorAll('.data-tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
-    });
-    document.getElementById('dataTabExport').classList.toggle('active', tabName === 'export');
-    document.getElementById('dataTabImport').classList.toggle('active', tabName === 'import');
-    if (dataTabArchived) dataTabArchived.classList.toggle('active', tabName === 'archived');
-    document.getElementById('dataTabReset').classList.toggle('active', tabName === 'reset');
-
-    if (tabName === 'archived') {
-      renderDataModalArchivedList();
-    }
-  }
-
   openDataModalBtn.addEventListener('click', () => openDataModal('export'));
   closeDataModalBtn.addEventListener('click', closeDataModal);
+  if (dataModal) {
+    dataModal.addEventListener('click', (e) => {
+      if (e.target === dataModal) closeDataModal();
+    });
+  }
 
-  dataModal.querySelectorAll('.data-tab-btn').forEach(btn => {
+  dataTabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       switchDataTab(btn.getAttribute('data-tab'));
     });
